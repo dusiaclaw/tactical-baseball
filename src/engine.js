@@ -69,15 +69,73 @@ function pitcherTargets(r, f) {
   return { K, BB, '1B': S, '2B': D, HR, GB: rest * .4, DP: rest * .2, FB: rest * .4 };
 }
 const CARD_CACHE = {};
+/* ---------- gear, moves, effective ratings ---------- */
+const GEAR = {
+  bat1: { slot: 'bat', kind: 'H', name: 'Ash bat', cost: 120, b: { pow: 1 } },
+  bat2: { slot: 'bat', kind: 'H', name: 'Maple bat', cost: 280, b: { pow: 2 } },
+  bat3: { slot: 'bat', kind: 'H', name: 'Pro-model maple bat', cost: 520, b: { pow: 2, con: 1 } },
+  bgl1: { slot: 'gloves', kind: 'H', name: 'Batting gloves', cost: 100, b: { con: 1 } },
+  bgl2: { slot: 'gloves', kind: 'H', name: 'Pro batting gloves', cost: 260, b: { con: 2 } },
+  sun1: { slot: 'shades', kind: 'H', name: 'Sport sunglasses', cost: 90, b: { eye: 1 } },
+  sun2: { slot: 'shades', kind: 'H', name: 'Polarized shades', cost: 240, b: { eye: 2 } },
+  clt1: { slot: 'cleats', kind: 'H', name: 'Cleats', cost: 90, b: { spd: 1 } },
+  clt2: { slot: 'cleats', kind: 'H', name: 'Featherlight cleats', cost: 240, b: { spd: 2 } },
+  pgl1: { slot: 'glove', kind: 'P', name: "Pitcher's glove", cost: 140, b: { stu: 1 } },
+  pgl2: { slot: 'glove', kind: 'P', name: 'Gold-lace glove', cost: 320, b: { stu: 2 } },
+  cap1: { slot: 'cap', kind: 'P', name: 'Lucky cap', cost: 110, b: { ctl: 1 } },
+  cap2: { slot: 'cap', kind: 'P', name: 'Flat-brim pro cap', cost: 260, b: { ctl: 2 } },
+  slv1: { slot: 'sleeve', kind: 'P', name: 'Compression sleeve', cost: 110, b: { sta: 1 } },
+  slv2: { slot: 'sleeve', kind: 'P', name: 'Pro arm sleeve', cost: 260, b: { sta: 2 } }
+};
+const SLOTS = { H: ['bat', 'gloves', 'shades', 'cleats'], P: ['glove', 'cap', 'sleeve'] };
+const SLOT_NAME = { bat: 'Bat', gloves: 'Batting gloves', shades: 'Sunglasses', cleats: 'Cleats', glove: 'Glove', cap: 'Cap', sleeve: 'Arm sleeve' };
+const MOVES = {
+  spray: { kind: 'H', name: 'Spray Hitter', desc: 'one ground-out box becomes a single', from: ['GB', 'DP'], to: '1B' },
+  eye: { kind: 'H', name: 'Patient Eye', desc: 'one strikeout box becomes a walk', from: ['K'], to: 'BB' },
+  gap: { kind: 'H', name: 'Gap Hunter', desc: 'one single becomes a double', from: ['1B'], to: '2B' },
+  slugger: { kind: 'H', name: 'Big Swing', desc: 'one fly-out box becomes a home run', from: ['FB'], to: 'HR' },
+  speedster: { kind: 'H', name: 'Speedster', desc: '+1 SPD on the bases', stat: { spd: 1 } },
+  kpitch: { kind: 'P', name: 'Strikeout Pitch', desc: 'one single on his card becomes a strikeout', from: ['1B'], to: 'K' },
+  sinker: { kind: 'P', name: 'Sinker', desc: 'one fly-out box becomes a double-play ball', from: ['FB'], to: 'DP' },
+  paint: { kind: 'P', name: 'Painted Corners', desc: 'one walk box becomes a strikeout', from: ['BB'], to: 'K' },
+  workhorse: { kind: 'P', name: 'Workhorse', desc: '+2 STA, tires later', stat: { sta: 2 } }
+};
+const MOVE_LEVELS = [3, 6, 10, 15];
+function movePlan(p) {
+  const r = p.r;
+  if (p.kind === 'P') return r.stu >= r.ctl ? ['kpitch', 'sinker', 'workhorse', 'paint'] : ['paint', 'sinker', 'kpitch', 'workhorse'];
+  return r.pow >= 6 ? ['gap', 'eye', 'slugger', 'spray'] : r.spd >= 6 ? ['speedster', 'spray', 'eye', 'gap'] : ['spray', 'eye', 'gap', 'slugger'];
+}
+const levelOf = p => 1 + Math.floor(p.xp / 30);
+function R(p) {
+  if (!p.gear && !p.moves) return p.r;
+  const r = { ...p.r };
+  for (const s in p.gear || {}) { const g = GEAR[p.gear[s]]; if (g) for (const k in g.b) r[k] += g.b[k]; }
+  for (const m of p.moves || []) { const mv = MOVES[m]; if (mv && mv.stat) for (const k in mv.stat) r[k] += mv.stat[k]; }
+  return r;
+}
+function applyMoves(card, moves) {
+  if (!moves || !moves.length) return card;
+  const c = card.slice();
+  for (const m of moves) {
+    const mv = MOVES[m]; if (!mv || !mv.from) continue;
+    let bi = -1, bw = 99;
+    c.forEach((x, i) => { const w = W[i + 2]; if (mv.from.includes(x) && w >= 2 && w < bw) { bw = w; bi = i; } });
+    if (bi < 0) c.forEach((x, i) => { if (bi < 0 && mv.from.includes(x)) bi = i; });
+    if (bi >= 0) c[bi] = mv.to;
+  }
+  return c;
+}
 function batterCard(p, tactic) {
-  const key = 'b' + p.r.con + p.r.pow + p.r.spd + p.r.eye;
-  const base = CARD_CACHE[key] || (CARD_CACHE[key] = buildCard(batterTargets(p.r)));
+  const r = R(p), mk = (p.moves || []).join(',');
+  const key = 'b' + r.con + '.' + r.pow + '.' + r.spd + '.' + r.eye + '|' + mk;
+  const base = CARD_CACHE[key] || (CARD_CACHE[key] = applyMoves(buildCard(batterTargets(r)), p.moves));
   return tactic === 'power' ? base.map(c => c === '1B' ? 'FB' : c === '2B' ? 'HR' : c) : base;
 }
 function pitcherCard(p, f) {
   const fq = Math.round((f || 0) * 3) / 3;
-  const key = 'p' + p.r.stu + p.r.ctl + '_' + fq;
-  return CARD_CACHE[key] || (CARD_CACHE[key] = buildCard(pitcherTargets(p.r, fq)));
+  const r = R(p), key = 'p' + r.stu + '.' + r.ctl + '_' + fq + '|' + (p.moves || []).join(',');
+  return CARD_CACHE[key] || (CARD_CACHE[key] = applyMoves(buildCard(pitcherTargets(r, fq)), p.moves));
 }
 function cardOdds(card) { const o = {}; card.forEach((c, i) => o[c] = (o[c] || 0) + W[i + 2] / 36); return o; }
 
@@ -100,7 +158,7 @@ function genPitcher(pos, str, t) {
   return { id: 'p' + (C.nid++), first, last, kind: 'P', pos, hand: rand() < .3 ? 'L' : 'R', num: jersey(t),
     r: { stu: rr(str, .2), ctl: rr(str, 0), sta: rr(str, pos === 'SP' ? 1 : -1.5) }, xp: 0, tp: 0, s: blankStats(), c: blankStats() };
 }
-function ovr(p) { const r = p.r; return p.kind === 'P' ? (1.3 * r.stu + 1 * r.ctl + .5 * r.sta) / 2.8 : (1.25 * r.con + 1.2 * r.pow + .6 * r.spd + .7 * r.eye) / 3.75; }
+function ovr(p) { const r = R(p); return p.kind === 'P' ? (1.3 * r.stu + 1 * r.ctl + .5 * r.sta) / 2.8 : (1.25 * r.con + 1.2 * r.pow + .6 * r.spd + .7 * r.eye) / 3.75; }
 function autoOrder(hs) {
   const sc = p => p.r.con * 1.1 + p.r.pow + p.r.eye * .6;
   const s = [...hs].sort((a, b) => sc(b) - sc(a));
@@ -129,7 +187,7 @@ function roundRobin(ids) {
 }
 function newCampaign(o) {
   C = { v: 2, club: o.club, innings: o.innings, diff: o.diff, season: 1, week: 0, phase: 'season', outcome: null, credits: 150, nid: 1, names: {},
-    teams: {}, schedule: [], fa: [], game: null, po: null, hist: [], titles: 0, allW: 0, allL: 0, last: null,
+    teams: {}, schedule: [], fa: [], inv: [], game: null, po: null, hist: [], titles: 0, allW: 0, allL: 0, last: null,
     settings: { sound: true, speed: 'normal' }, created: Date.now() };
   const off = { rookie: -.7, pro: 0, legend: .6 }[o.diff];
   for (const t of TEAMS) C.teams[t.id] = genTeam(t.id, t.str + (t.id === o.club ? 0 : off));
@@ -244,7 +302,7 @@ const curBatter = g => getP(curBatterId(g));
 const curPitcher = g => getP(g.pit[fieldSide(g)]);
 const runsOf = (g, side) => g.line[side].reduce((a, b) => a + (b || 0), 0);
 const MOM_MAX = 5;
-function pitchCap(p) { return p.pos === 'SP' ? 8 + 1.5 * p.r.sta : 3 + .8 * p.r.sta; }
+function pitchCap(p) { const s = R(p).sta; return p.pos === 'SP' ? 8 + 1.5 * s : 3 + .8 * s; }
 function fatigueOf(g, side) { const p = getP(g.pit[side]); return clamp((g.bf[side] - pitchCap(p)) / 6, 0, 1); }
 function cardsNow(g, tactic) {
   const bat = curBatter(g), pit = curPitcher(g), f = fatigueOf(g, fieldSide(g));
@@ -263,7 +321,7 @@ function logPlay(g, txt, cls) { g.log.unshift({ tag: (g.half === 0 ? 'â–²' : 'â–
 function advance(B, outs, batId, code) {
   const mv = [], nb = [null, null, null], moved = new Set(), scorers = [], notes = [];
   let o = outs;
-  const spd = id => { const p = getP(id); return p ? p.r.spd : 5; };
+  const spd = id => { const p = getP(id); return p ? R(p).spd : 5; };
   const put = (id, from, to) => { moved.add(from); mv.push({ id, from, to }); if (to === 'out') o++; else if (to >= 4) scorers.push(id); else nb[to - 1] = id; };
   const [r1, r2, r3] = B;
   switch (code) {
@@ -334,9 +392,9 @@ function rerollEV(g, dice, i, tactic) { let ev = 0; for (let f = 1; f <= 6; f++)
 function rerollGood(g, dice, i, tactic) { const d = rerollDist(g, dice, i, tactic); let p = 0; for (const k in d) if (onBase(k)) p += d[k]; return p; }
 
 /* ---------- bunt & steal ---------- */
-const buntNeed = p => p.r.spd >= 7 ? 5 : 6;
+const buntNeed = p => R(p).spd >= 7 ? 5 : 6;
 function stealInfo(g) { const B = g.bases; if (B[0] && !B[1]) return { from: 1, id: B[0] }; if (B[1] && !B[2]) return { from: 2, id: B[1] }; return null; }
-function stealNeed(g) { const si = stealInfo(g); if (!si) return 7; const s = getP(si.id).r.spd; return clamp((si.from === 1 ? 4 : 5) - (s >= 7 ? 1 : 0) - (s >= 9 ? 1 : 0) + (s <= 3 ? 1 : 0), 2, 6); }
+function stealNeed(g) { const si = stealInfo(g); if (!si) return 7; const s = R(getP(si.id)).spd; return clamp((si.from === 1 ? 4 : 5) - (s >= 7 ? 1 : 0) - (s >= 9 ? 1 : 0) + (s <= 3 ? 1 : 0), 2, 6); }
 
 /* ---------- applying results to the real game ---------- */
 function gainMom(g, side, n, why) { const before = g.mom[side]; g.mom[side] = Math.min(MOM_MAX, g.mom[side] + n); return g.mom[side] > before ? why : null; }
@@ -518,8 +576,13 @@ function finishGame() {
     let x = won ? 5 : 2;
     if (b) x += b.h * 6 + b.d * 3 + b.t * 6 + b.hr * 8 + b.rbi * 3 + b.r * 2 + b.bb * 3 + b.sb * 3 + b.po * 1 + b.pk * 2 - b.ra * 2;
     x = Math.max(2, x);
-    const before = Math.floor(p.xp / XP_PER_TP); p.xp += x; const gained = Math.floor(p.xp / XP_PER_TP) - before;
-    if (gained > 0) { p.tp += gained; lv.push({ id: p.id, n: gained }); }
+    const before = Math.floor(p.xp / XP_PER_TP), lvBefore = levelOf(p); p.xp += x; const gained = Math.floor(p.xp / XP_PER_TP) - before;
+    const learned = [];
+    for (const L of MOVE_LEVELS) if (lvBefore < L && levelOf(p) >= L) {
+      p.moves = p.moves || []; const next = movePlan(p).find(m => !p.moves.includes(m));
+      if (next && p.moves.length < 4) { p.moves.push(next); learned.push(next); }
+    }
+    if (gained > 0) { p.tp += gained; lv.push({ id: p.id, n: gained, level: levelOf(p), learned }); }
     xp[p.id] = x;
   }
   const cr = (won ? 120 : 60) + Math.min(60, my * 8);
@@ -541,6 +604,15 @@ function startGame() {
   logPlay(G, `${teamInfo(G.away).name} at ${teamInfo(G.home).name}. ${G.label}.`, 'sys');
   C.game = G; return G;
 }
+function buyGear(key) { const g = GEAR[key]; if (!g || C.credits < g.cost) return false; C.credits -= g.cost; (C.inv = C.inv || []).push(key); return true; }
+function equipGear(pid, key) {
+  const p = getP(pid), g = GEAR[key]; if (!p || !g || g.kind !== p.kind) return false;
+  const i = (C.inv || []).indexOf(key); if (i < 0) return false;
+  C.inv.splice(i, 1); p.gear = p.gear || {};
+  if (p.gear[g.slot]) C.inv.push(p.gear[g.slot]);
+  p.gear[g.slot] = key; return true;
+}
+function unequipGear(pid, slot) { const p = getP(pid); if (!p || !p.gear || !p.gear[slot]) return; (C.inv = C.inv || []).push(p.gear[slot]); delete p.gear[slot]; }
 function signFA(faId, releaseId) {
   const fa = C.fa.find(p => p.id === faId), t = C.teams[C.club];
   if (!fa || C.credits < fa.cost) return false;

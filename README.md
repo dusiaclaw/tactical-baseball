@@ -13,6 +13,8 @@ On Android, open the link in Chrome and tap **Install on this phone** on the tit
 - **Momentum ◆**: spend one to re-roll a single die, either to rescue your own out or to cancel the other team's big hit. The game shows the odds for each die before you choose. Earn ◆ with extra-base hits and strikeouts.
 - **Tactics**: Swing, Power (singles become fly outs, doubles become home runs), Bunt, Steal. On defense: bullpen and intentional walks. Pitcher cards wear down as they tire.
 - **Settings**: accent colour, field style, card colours, sound, vibration, animation speed, odds on/off, and an optional loader for real player names from the league stats page (stored only on your phone).
+- **Club building**: drag-and-drop batting order and an optimizer; a Market for gear (bats, batting gloves, sunglasses, cleats, pitcher gloves, caps, sleeves) that boosts ratings; players level up and learn moves that rewrite boxes on their cards.
+- **Season stats**: team and player leaderboards. Every club has its own home park.
 - **Campaign**: a 7-week season against eight clubs, playoffs for the top four, player XP and training (better ratings mean better cards), free agents. A 3-inning game takes about 3–4 minutes. Progress saves on the device after every roll, with backup export and restore.
 
 ## Development

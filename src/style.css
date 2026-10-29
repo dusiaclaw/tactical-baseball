@@ -307,3 +307,53 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 .fld{display:grid; gap:4px; font-size:13px; color:var(--muted); font-weight:700}
 .fld input{background:var(--bg2); color:var(--text); border:1px solid var(--line2); border-radius:10px; padding:11px 12px; font:16px var(--f-ui)}
 .fld input:focus{outline:2px solid var(--amber); border-color:transparent}
+
+/* ---------- v2.2: roster drag, gear, levels, stats, title fit, intro ---------- */
+.title{height:100dvh; min-height:0; overflow:hidden; gap:clamp(8px,2dvh,18px); padding-block:max(12px,env(safe-area-inset-top,0px)) 12px; align-content:center}
+.title .art{width:min(58vw, 30dvh, 300px)}
+.title h1{font-size:clamp(32px, min(10vw, 6.5dvh), 60px)}
+.title .tag{margin:-4px 0 0; font-size:14px}
+.title .menu{gap:8px}
+.title .menu .btn{padding:12px 14px; font-size:16px}
+.title .menu .row2{display:flex; gap:8px} .title .menu .row2 .btn{flex:1}
+.title .foot{font-size:10.5px; line-height:1.35; margin:0}
+.prow{cursor:pointer}
+.grip{display:grid; place-items:center; width:22px; height:34px; color:var(--muted); touch-action:none; cursor:grab}
+.prow.dragging{opacity:.35}
+.prow.over{box-shadow:0 0 0 2px var(--amber); background:#2a2a16}
+.prow.ghost{position:fixed; z-index:80; pointer-events:none; opacity:.95; box-shadow:0 12px 28px #000a; background:#22392d; margin:0}
+.lvtag{font-size:11px; font-weight:800; letter-spacing:.06em; background:var(--amber); color:var(--amber-ink); border-radius:6px; padding:2px 7px}
+.xpbar{height:6px; border-radius:4px; background:#0b1410; overflow:hidden; margin-top:-6px} .xpbar i{display:block; height:100%; background:var(--amber)}
+.rbar .bar{display:flex} .rbar .bar i.boost{background:var(--amber); border-radius:0 4px 4px 0}
+.rbar .v em{font-style:normal; color:var(--amber); font-size:11px; margin-left:1px}
+.gear{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px}
+.gslot{appearance:none; text-align:left; border:1px dashed var(--line2); background:var(--bg2); border-radius:10px; padding:8px 10px; display:grid; gap:1px; min-width:0}
+.gslot.on{border-style:solid; border-color:#9c7a26; background:#2b2410}
+.gslot small{font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.gslot b{font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis} .gslot i{font-style:normal; font-size:12px; color:#ffd77a}
+.moves{display:grid; gap:6px}
+.move{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px; display:grid; gap:1px}
+.move b{font-size:14px} .move span{font-size:12.5px; color:var(--muted)}
+.move.next{opacity:.6; border-style:dashed} .move.learned{border-color:#9c7a26; background:#2b2410}
+.glist{display:grid; gap:6px}
+.gitem{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 10px; align-items:center; background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:8px 10px; position:relative}
+.gitem small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.gitem b{display:block; font-size:14.5px} .gitem i{font-style:normal; font-size:12.5px; color:#ffd77a}
+.gitem .owned{position:absolute; top:6px; right:96px; font-size:12px; font-weight:800; color:var(--hit)}
+table.stats th{cursor:pointer; white-space:nowrap} table.stats th.sorted{color:var(--amber)} table.stats td{white-space:nowrap}
+table.stats td:first-child{max-width:130px; overflow:hidden; text-overflow:ellipsis}
+#intro{position:fixed; inset:0; z-index:100; background:radial-gradient(90% 70% at 50% 40%, #183323, #0a130e); display:grid; place-items:center; align-content:center; gap:10px; cursor:pointer; transition:opacity .45s}
+#intro.out{opacity:0}
+#intro svg{width:min(78vw, 46dvh); overflow:visible}
+#intro .ifield{fill:#2c6a39; opacity:0; animation:ifade .5s .05s forwards}
+#intro .idirt{fill:#c27a4b; opacity:0; animation:ifade .4s .3s forwards}
+#intro .iline{fill:none; stroke:#f7f4ea; stroke-width:3; stroke-dasharray:420; stroke-dashoffset:420; animation:idraw .7s .35s ease-out forwards}
+#intro .ibase{fill:#f7f4ea; transform:scale(0); animation:ipop .3s ease-out forwards}
+#intro .iballx{transform:translate(150px,262px); animation:ibx 1s 1s cubic-bezier(.3,.6,.6,1) forwards}
+#intro .ibally{opacity:0; animation:iby 1s 1s ease-out forwards}
+#intro h1{margin:0; font-family:var(--f-display); font-weight:400; font-size:clamp(34px,10vw,56px); line-height:.95; text-align:center; opacity:0; transform:translateY(16px); animation:iup .6s 1.35s ease-out forwards}
+#intro h1 span{display:block; color:var(--amber)}
+@keyframes ifade{to{opacity:1}} @keyframes idraw{to{stroke-dashoffset:0}} @keyframes ipop{to{transform:scale(1)}}
+@keyframes ibx{to{transform:translate(236px,30px)}}
+@keyframes iby{0%{opacity:1; transform:translateY(0) scale(1)}50%{transform:translateY(-60px) scale(1.6)}100%{opacity:1; transform:translateY(0) scale(.8)}}
+@keyframes iup{to{opacity:1; transform:none}}
