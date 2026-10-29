@@ -303,3 +303,7 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 .setlist{display:grid; gap:6px}
 .setrow > span{font-size:14.5px}
 #nMsg{margin:0; font-size:13.5px} #nMsg.err{color:#ffb2a8} #nMsg.ok{color:var(--hit)}
+
+.fld{display:grid; gap:4px; font-size:13px; color:var(--muted); font-weight:700}
+.fld input{background:var(--bg2); color:var(--text); border:1px solid var(--line2); border-radius:10px; padding:11px 12px; font:16px var(--f-ui)}
+.fld input:focus{outline:2px solid var(--amber); border-color:transparent}

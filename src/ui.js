@@ -263,6 +263,7 @@
       <p style="font-size:12.5px" class="muted">${keys.map(k => `<b style="color:var(--text)">${RLAB[k]}</b> ${RDESC[k]}`).join(' · ')}</p>
       <p style="font-size:13px" class="muted">${p.tp ? `<b style="color:var(--amber)">${p.tp} training point${p.tp > 1 ? 's' : ''}</b> to spend. Each +1 can change a box on the card. ` : ''}${XP_PER_TP - xpIn} XP to the next point.</p>
       <p style="font-size:14px"><span class="eyebrow">This season</span><br><span class="num">${line}</span></p>
+      <button class="btn small" data-a="edit">Edit name and number</button>
       ${acts}
       <button class="btn block" data-a="close">Done</button>`, sh => {
       sh.onclick = e => {
@@ -271,12 +272,36 @@
         const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
         const a = b.dataset.a, x = b.dataset.x;
         if (a === 'close') { closeSheet(); return; }
+        if (a === 'edit') { editPlayer(id); return; }
         if (a === 'up' || a === 'down') { const j = li + (a === 'up' ? -1 : 1); [t.lineup[li], t.lineup[j]] = [t.lineup[j], t.lineup[li]]; }
         if (a === 'bench') { const bj = t.bench.indexOf(x); t.bench[bj] = id; t.lineup[li] = { id: x, pos: t.lineup[li].pos }; }
         if (a === 'start') { const j = t.lineup.findIndex(sl => sl.id === x); t.bench[bi] = x; t.lineup[j] = { id, pos: t.lineup[j].pos }; }
         if (a === 'nextsp') t.nextSP = ri + Math.floor(t.nextSP / t.rotation.length) * t.rotation.length;
         if (a === 'role') { const q = getP(x); if (ri >= 0) { const j = t.pen.indexOf(x); t.rotation[ri] = x; t.pen[j] = id; p.pos = 'RP'; q.pos = 'SP'; } else { const j = t.rotation.indexOf(x); t.pen[pi] = x; t.rotation[j] = id; p.pos = 'SP'; q.pos = 'RP'; } }
         save(); closeSheet(); renderHub();
+      };
+    });
+  }
+  function editPlayer(id) {
+    const p = getP(id), t = C.teams[C.club];
+    const clean = v => v.replace(/[<>&"]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+    openSheet(`<h3>Edit player</h3>
+      <label class="fld"><span>First name</span><input id="eFirst" maxlength="20" value="${p.first}" autocomplete="off"></label>
+      <label class="fld"><span>Last name</span><input id="eLast" maxlength="20" value="${p.last}" autocomplete="off"></label>
+      <label class="fld"><span>Number</span><input id="eNum" type="number" inputmode="numeric" min="0" max="99" value="${p.num}"></label>
+      <p id="eMsg" class="muted" style="font-size:13px">Your edits are kept even if you switch between real and fictional names.</p>
+      <div class="row2"><button class="btn" data-a="cancel">Cancel</button><button class="btn primary" data-a="save">Save</button></div>`, sh => {
+      sh.onclick = e => {
+        const b = e.target.closest('[data-a]'); if (!b) return;
+        if (b.dataset.a === 'cancel') { playerSheet(id); return; }
+        const first = clean($('#eFirst').value), last = clean($('#eLast').value), num = parseInt($('#eNum').value, 10);
+        const msg = $('#eMsg');
+        if (!first || !last) { msg.textContent = 'Enter a first and last name.'; msg.style.color = '#ffb2a8'; return; }
+        if (!(num >= 0 && num <= 99)) { msg.textContent = 'Use a number from 0 to 99.'; msg.style.color = '#ffb2a8'; return; }
+        const clash = t.players.find(q => q !== p && q.num === num);
+        if (clash) { msg.textContent = `#${num} is already worn by ${clash.first} ${clash.last}.`; msg.style.color = '#ffb2a8'; return; }
+        p.first = first; p.last = last; p.num = num; p.custom = true;
+        save(); SFX.play('tap'); toast('Player updated.'); playerSheet(id); renderHub();
       };
     });
   }
@@ -404,6 +429,7 @@
       const hitters = [...t.lineup.map(s => getP(s.id)), ...t.bench.map(getP)];
       const list = n && n.teams[id] ? n.teams[id] : [];
       hitters.forEach((p, i) => {
+        if (p.custom) return;
         if (!p.gn) p.gn = [p.first, p.last];
         if (list[i]) { p.first = list[i].first; p.last = list[i].last; } else { p.first = p.gn[0]; p.last = p.gn[1]; }
       });
