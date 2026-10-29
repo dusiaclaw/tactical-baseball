@@ -1312,6 +1312,42 @@ function signFA(faId, releaseId) {
     const count = Object.values(teams).reduce((a, l) => a + l.length, 0);
     return { teams, count };
   }
+  const CSV_TEAMS = { EIG: 'ZHE', CAR: 'BEC', BAR: 'ZHB', CHA: 'ZHC', EAG: 'LUE', UNI: 'HUU', FLY: 'THF', THE: 'THF', FRO: 'SIF', SIS: 'SIF' };
+  function parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return null;
+    const sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
+    const head = lines[0].split(sep).map(h => h.trim().toUpperCase());
+    const col = k => head.indexOf(k);
+    if (col('PLAYER') < 0) return null;
+    const rows = [], skipped = {};
+    for (const ln of lines.slice(1)) {
+      const c = ln.split(sep); const raw = (c[col('PLAYER')] || '').trim();
+      const m = raw.match(/^(.+?),\s*(.+?)\s+([A-Z0-9\/]+)$/); if (!m) continue;
+      const last = m[1].trim(), first = m[2].trim();
+      if (/^Z-/.test(first) || /\d|Liga|Lizenz/.test(last)) continue;
+      const codes = m[3].split('/').map(x => x.replace(/\d+$/, ''));
+      const team = codes.map(x => CSV_TEAMS[x]).find(Boolean);
+      if (!team) { skipped[m[3]] = 1; continue; }
+      const n = k => { const i = col(k); return i >= 0 ? parseFloat(c[i]) || 0 : 0; };
+      const pa = n('PA'), ab = n('AB'), h = n('H'), d = n('2B'), t3 = n('3B'), hr = n('HR');
+      rows.push({ team, first, last, pa, g: n('G'), avg: ab ? h / ab : 0, iso: ab ? (d + 2 * t3 + 3 * hr) / ab : 0, hr, bbr: pa ? n('BB') / pa : 0, sbg: n('G') ? n('SB') / n('G') : 0, kr: pa ? n('SO') / pa : 0 });
+    }
+    if (!rows.length) return { teams: {}, count: 0, skipped: Object.keys(skipped) };
+    // ratings relative to the league in the file, shrunk toward average for small samples
+    const stat = k => { const v = rows.filter(r => r.pa >= 10).map(r => r[k]); const mu = avg(v); const sd = Math.sqrt(avg(v.map(x => (x - mu) ** 2))) || 1; return [mu, sd]; };
+    const S = { avg: stat('avg'), iso: stat('iso'), bbr: stat('bbr'), sbg: stat('sbg'), kr: stat('kr') };
+    const z = (r, k) => (r[k] - S[k][0]) / S[k][1];
+    const teams = {};
+    rows.sort((a, b) => b.pa - a.pa);
+    for (const r of rows) {
+      const w = r.pa / (r.pa + 25), f = x => clamp(Math.round(5 + w * x), 1, 10);
+      const list = teams[r.team] || (teams[r.team] = []);
+      if (list.some(x => x.first === r.first && x.last === r.last)) continue;
+      list.push({ first: r.first, last: r.last, r: { con: f(1.7 * z(r, 'avg') - .5 * z(r, 'kr')), pow: f(1.8 * z(r, 'iso') + (r.hr ? .6 : 0)), spd: f(1.6 * z(r, 'sbg')), eye: f(1.8 * z(r, 'bbr')) } });
+    }
+    return { teams, count: Object.values(teams).reduce((a, l) => a + l.length, 0), skipped: Object.keys(skipped), stats: true };
+  }
   function applyNames() {
     if (!C) return;
     const n = realNamesOn() ? loadNames() : null;
@@ -1320,6 +1356,8 @@ function signFA(faId, releaseId) {
       const hitters = [...t.lineup.map(s => getP(s.id)), ...t.bench.map(getP)];
       const list = n && n.teams[id] ? n.teams[id] : [];
       hitters.forEach((p, i) => {
+        if (!p.gr) p.gr = { ...p.r };
+        if (n && n.useStats && list[i] && list[i].r) Object.assign(p.r, list[i].r); else if (p.gr) Object.assign(p.r, p.gr);
         if (p.custom) return;
         if (!p.gn) p.gn = [p.first, p.last];
         if (list[i]) { p.first = list[i].first; p.last = list[i].last; } else { p.first = p.gn[0]; p.last = p.gn[1]; }
@@ -1332,13 +1370,16 @@ function signFA(faId, releaseId) {
     const show = (msg, cls) => { const el = $('#nMsg'); if (el) { el.innerHTML = msg; el.className = cls || ''; } };
     const preview = res => {
       found = res;
+      $('#nStatsRow').style.display = res.stats && res.count ? 'flex' : 'none';
       const per = Object.entries(res.teams).map(([id, l]) => `${teamInfo(id).name} ${l.length}`).join(' · ');
-      show(res.count ? `Found <b>${res.count}</b> players. ${per}.` : 'No players from the eight clubs found in that text.', res.count ? 'ok' : 'err');
+      show((res.count ? `Found <b>${res.count}</b> players. ${per}.` : 'No players from the eight clubs found in that text.') + (res.skipped && res.skipped.length ? `<br><span class="muted">Skipped clubs not in the game: ${res.skipped.join(', ')}.</span>` : ''), res.count ? 'ok' : 'err');
       $('#nUse').disabled = !res.count;
     };
     openSheet(`<h3>Load real player names</h3>
-      <p>Names come from the league stats page and are saved only on this phone. Batting stats list hitters, so pitchers keep fictional names. Each club's names fill its lineup and bench in order.</p>
-      <button class="btn primary" id="nFetch">Fetch from easyscore.com</button>
+      <p>Import the CSV export from the league stats page (or fetch or paste it). Names are saved only on this phone. Batting stats list hitters, so pitchers keep fictional names. Each club's players with the most plate appearances fill its lineup first, then the bench.</p>
+      <button class="btn primary" id="nCsv">Import CSV export</button><input type="file" id="nCsvFile" accept=".csv,text/csv,text/plain" hidden>
+      <label id="nStatsRow" style="display:none;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="nStats" checked style="width:20px;height:20px"> Also set their ratings from these stats</label>
+      <button class="btn" id="nFetch">Fetch from easyscore.com</button>
       <p id="nMsg"></p>
       <details id="nPasteBox"><summary class="eyebrow" style="cursor:pointer">Or paste the table yourself</summary>
         <p style="font-size:13.5px;margin-top:8px">Open the <a href="${NAMES_URL}" target="_blank" rel="noopener" style="color:var(--amber)">stats page</a>, select the whole table, copy it, and paste it here.</p>
@@ -1356,10 +1397,12 @@ function signFA(faId, releaseId) {
           $('#nPasteBox').open = true;
         }
       };
-      $('#nParse').onclick = () => preview(parseNames($('#nText').value));
+      $('#nParse').onclick = () => { const t = $('#nText').value; preview(parseCSV(t) || parseNames(t)); };
+      $('#nCsv').onclick = () => $('#nCsvFile').click();
+      $('#nCsvFile').onchange = e => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { const r = parseCSV(String(rd.result)); if (r) preview(r); else show("That file doesn't look like the stats export: it needs a Player column.", 'err'); }; rd.readAsText(f); };
       $('#nUse').onclick = () => {
         if (!found || !found.count) return;
-        try { localStorage.setItem(NAMES_KEY, JSON.stringify({ at: Date.now(), source: NAMES_URL, teams: found.teams, count: found.count })); } catch (e) { toast('Could not save the names.'); return; }
+        try { localStorage.setItem(NAMES_KEY, JSON.stringify({ at: Date.now(), teams: found.teams, count: found.count, useStats: !!(found.stats && $('#nStats').checked) })); } catch (e) { toast('Could not save the names.'); return; }
         SET.names = 'real'; saveSet(); applyNames(); closeSheet(); toast(`${found.count} real names saved.`); if (screen === 'settings') renderSettings();
       };
       sh.querySelector('[data-a="close"]').onclick = closeSheet;
