@@ -195,6 +195,8 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 .die i.on{visibility:visible}
 .die.card{background:var(--dc,#56645b)} .die.card i{background:#fff}
 .die.blank i{visibility:hidden}
+.die .ico{position:absolute; inset:0; margin:auto; filter:drop-shadow(0 1px 0 #0004)}
+.pcard .tag .ico{vertical-align:-2px; margin-left:2px}
 .die .q{position:absolute; inset:0; display:grid; place-items:center; font-weight:800; font-size:22px; color:#ffffffcc}
 .die .lab{position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:5px; font-size:10.5px; font-weight:800; letter-spacing:.05em; white-space:nowrap; color:var(--muted)}
 .die .lab.odds{color:var(--amber); font-size:12px}

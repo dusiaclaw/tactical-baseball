@@ -210,6 +210,8 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 .die i.on{visibility:visible}
 .die.card{background:var(--dc,#56645b)} .die.card i{background:#fff}
 .die.blank i{visibility:hidden}
+.die .ico{position:absolute; inset:0; margin:auto; filter:drop-shadow(0 1px 0 #0004)}
+.pcard .tag .ico{vertical-align:-2px; margin-left:2px}
 .die .q{position:absolute; inset:0; display:grid; place-items:center; font-weight:800; font-size:22px; color:#ffffffcc}
 .die .lab{position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:5px; font-size:10.5px; font-weight:800; letter-spacing:.05em; white-space:nowrap; color:var(--muted)}
 .die .lab.odds{color:var(--amber); font-size:12px}
@@ -870,6 +872,9 @@ function signFA(faId, releaseId) {
   const KIND = c => ({ HR: 'k-hr', '3B': 'k-xbh', '2B': 'k-xbh', '1B': 'k-hit', BB: 'k-bb', K: 'k-k', GB: 'k-out', FB: 'k-out', DP: 'k-dp' })[c];
   const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
   const pct = x => Math.round(x * 100) + '%';
+  const ICON_BAT = '<path d="M8.5 33.5 L12 30 L29 10.5 C31 8 34 7.5 35.5 9 C37 10.5 36.5 13.5 34 15.5 L14.5 32.5 L11 36 Z"/><circle cx="7.6" cy="36.6" r="2.6"/>';
+  const ICON_GLOVE = '<path d="M11 35 C7.5 29 7 21 9 15.5 C9.8 13 12.8 13 13.3 15.6 L14.2 21 L14.6 9.6 C14.8 6.6 18.6 6.4 18.9 9.4 L19.6 19.5 L20.6 8.2 C21 5.3 24.8 5.5 24.9 8.5 L24.9 19.8 L26.6 11.4 C27.3 8.8 30.7 9.4 30.4 12.2 L29.4 23 C30.8 20.6 33.6 19.6 35 21.2 C35.9 22.4 34.6 24.8 32.6 27.6 L27.6 35 Z"/><path d="M13 30.5 Q20 33 26.5 30.5" fill="none" stroke="var(--dc,#2457c5)" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>';
+  const icon = (bat, size, color) => `<svg class="ico" viewBox="0 0 44 44" width="${size}" height="${size}" fill="${color || 'currentColor'}" aria-hidden="true">${bat ? ICON_BAT : ICON_GLOVE}</svg>`;
 
   /* ---------- persistence ---------- */
   function save() { if (!C) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(C)); } catch (e) { toast('Could not save. Browser storage is full or blocked.'); } }
@@ -919,8 +924,9 @@ function signFA(faId, releaseId) {
   function cardSummary(card) { const o = cardOdds(card); let ob = 0; for (const k of ['HR', '3B', '2B', '1B', 'BB']) ob += o[k] || 0; return { ob, hr: o.HR || 0, k: o.K || 0 }; }
   function dieHTML(v, opt) {
     opt = opt || {};
-    const pips = v ? PIPS[v] : [];
-    return `<button class="die ${opt.card ? 'card' : ''} ${opt.cls || ''}" ${opt.idx != null ? `data-die="${opt.idx}"` : ''} style="${opt.color ? `--dc:${opt.color}` : ''}" ${opt.disabled ? 'tabindex="-1"' : ''} aria-label="${opt.aria || 'die ' + (v || '')}">${Array.from({ length: 9 }, (_, i) => `<i class="${pips.includes(i) ? 'on' : ''}"></i>`).join('')}${!v ? '<span class="q">?</span>' : ''}${opt.lab ? `<span class="lab ${opt.labCls || ''}">${opt.lab}</span>` : ''}</button>`;
+    const face = opt.card && v;
+    const pips = v && !face ? PIPS[v] : [];
+    return `<button class="die ${opt.card ? 'card' : ''} ${opt.cls || ''}" ${opt.idx != null ? `data-die="${opt.idx}"` : ''} style="${opt.color ? `--dc:${opt.color}` : ''}" ${opt.disabled ? 'tabindex="-1"' : ''} aria-label="${opt.aria || (face ? (v <= 3 ? 'bat' : 'glove') : 'die ' + (v || ''))}">${face ? icon(v <= 3, 40, '#fff') : Array.from({ length: 9 }, (_, i) => `<i class="${pips.includes(i) ? 'on' : ''}"></i>`).join('')}${!v ? '<span class="q">?</span>' : ''}${opt.lab ? `<span class="lab ${opt.labCls || ''}">${opt.lab}</span>` : ''}</button>`;
   }
 
   /* =================== TITLE =================== */
@@ -950,7 +956,7 @@ function signFA(faId, releaseId) {
       <circle cx="200" cy="200" r="190" fill="#14261b" stroke="#26402f" stroke-width="2"/>
       <path d="M200 330 L320 210 L200 90 L80 210 Z" fill="#c27a4b"/><path d="M200 300 L290 210 L200 120 L110 210 Z" fill="#367a43"/>
       <g fill="#f7f4ea">${[[320, 210], [200, 90], [80, 210]].map(([x, y]) => `<rect x="${x - 9}" y="${y - 9}" width="18" height="18" transform="rotate(45 ${x} ${y})"/>`).join('')}<path d="M190 322h20v10l-10 9l-10-9z"/></g>
-      <g class="orb">${die(120, 260, -14, 5, '#2457c5', '#fff')}</g>
+      <g class="orb"><g transform="translate(120 260) rotate(-14)"><rect x="-34" y="-34" width="68" height="68" rx="14" fill="#2457c5" stroke="#0004" stroke-width="2"/><g transform="translate(-26 -26) scale(1.18)" fill="#fff">${ICON_BAT}</g></g></g>
       ${die(205, 215, 8, 6, '#f6f1e3', '#1b1b1b')}${die(285, 270, 22, 4, '#f6f1e3', '#1b1b1b')}
     </svg>`;
   }
@@ -1175,9 +1181,9 @@ function signFA(faId, releaseId) {
     const ex = ['K', 'GB', 'DP', 'FB', '1B', '1B', 'FB', 'BB', '2B', '1B', 'HR'];
     openSheet(`<h3>How to play</h3><div class="howto">
       <p>Every at-bat is one roll of three dice.</p>
-      <div style="display:flex;gap:12px;justify-content:center;padding-bottom:16px">${dieHTML(2, { card: true, color: '#2457c5', lab: 'CARD DIE', disabled: true })}${dieHTML(4, { lab: 'WHITE', disabled: true })}${dieHTML(5, { lab: 'WHITE', disabled: true })}</div>
-      <ul><li>The <b>card die</b> picks whose card is read: <b>1–3 the batter's card</b>, <b>4–6 the pitcher's card</b>.</li>
-      <li>The <b>two white dice</b> add up to 2–12. That number points to a box on the card. Here 4 + 5 = 9, a walk:</li></ul>
+      <div style="display:flex;gap:12px;justify-content:center;padding-bottom:16px">${dieHTML(2, { card: true, color: '#2457c5', lab: 'BAT', disabled: true })}${dieHTML(5, { card: true, color: '#c4262e', lab: 'GLOVE', disabled: true })}${dieHTML(4, { lab: 'WHITE', disabled: true })}${dieHTML(5, { lab: 'WHITE', disabled: true })}</div>
+      <ul><li>The <b>coloured die</b> shows a <b>bat</b> or a <b>glove</b>, each half the time. Bat: read the <b>batter's card</b>. Glove: read the <b>pitcher's card</b>.</li>
+      <li>The <b>two white dice</b> add up to 2–12. That number points to a box on the card. Say it shows the bat and the white dice show 4 + 5 = 9: a walk on the batter's card:</li></ul>
       <div class="pcard">${stripHTML(ex, { pick: 7 })}</div>
       <ul><li>Wider boxes come up more often. 7 is the most likely roll; 2 and 12 are rare.</li>
       <li>Higher numbers usually favour the batter. Batter cards are full of hits, pitcher cards full of outs.</li></ul>
@@ -1262,16 +1268,16 @@ function signFA(faId, releaseId) {
     const box = G.box[bat.id], today = box && box.pa ? `${box.h}-for-${box.ab}${box.hr ? `, ${box.hr} HR` : ''}` : 'first time up';
     const batCls = lr ? (lr.src === 'bat' ? 'live' : 'dim') : '', pitCls = lr ? (lr.src === 'pit' ? 'live' : 'dim') : '';
     $('#cards').innerHTML = `
-      <div class="pcard ${batCls}"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${bat.num}</span><div class="who"><b>${short(bat)} · ${slot.pos}</b><small>${keyRatings(bat)} · ${today}</small></div><div class="tag">BATTER · 1–3${tac === 'power' ? '<br><span style="color:#1f2620">POWER</span>' : ''}${gems(bs)}</div></div>
+      <div class="pcard ${batCls}"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${bat.num}</span><div class="who"><b>${short(bat)} · ${slot.pos}</b><small>${keyRatings(bat)} · ${today}</small></div><div class="tag">BATTER ${icon(true, 13)}${tac === 'power' ? '<br><span style="color:#1f2620">POWER</span>' : ''}${gems(bs)}</div></div>
         ${stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
-      <div class="pcard ${pitCls}"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${pit.num}</span><div class="who"><b>${short(pit)} · ${pit.hand}HP</b><small>${keyRatings(pit)} · ${G.bf[fs]} batters${f > 0 ? ' · <span class="tired">tiring</span>' : ''}</small></div><div class="tag">PITCHER · 4–6${gems(fs)}</div></div>
+      <div class="pcard ${pitCls}"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${pit.num}</span><div class="who"><b>${short(pit)} · ${pit.hand}HP</b><small>${keyRatings(pit)} · ${G.bf[fs]} batters${f > 0 ? ' · <span class="tired">tiring</span>' : ''}</small></div><div class="tag">PITCHER ${icon(false, 13)}${gems(fs)}</div></div>
         ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
   }
   function trayDice(dice, opt) {
     opt = opt || {};
     const bs = batSide(G), fs = fieldSide(G);
     const owner = dice && dice[0] ? (dice[0] <= 3 ? teamInfo(G[bs]).c1 : teamInfo(G[fs]).c1) : null;
-    const labs = opt.labs || ['CARD DIE', '', ''];
+    const labs = opt.labs || [dice && dice[0] ? (dice[0] <= 3 ? 'BAT' : 'GLOVE') : 'BAT / GLOVE', '', ''];
     return dieHTML(dice ? dice[0] : 0, { card: true, color: owner, idx: 0, cls: opt.cls && opt.cls[0], lab: labs[0], labCls: opt.labCls }) +
       dieHTML(dice ? dice[1] : 0, { idx: 1, cls: opt.cls && opt.cls[1], lab: labs[1], labCls: opt.labCls }) +
       dieHTML(dice ? dice[2] : 0, { idx: 2, cls: opt.cls && opt.cls[2], lab: labs[2], labCls: opt.labCls });
@@ -1286,7 +1292,7 @@ function signFA(faId, releaseId) {
     }
     $('#tray').onclick = null;
     const lr = lastRoll && lastRoll.seq === G.seq ? lastRoll : null;
-    $('#tray').innerHTML = lr && lr.dice ? trayDice(lr.dice, { labs: ['CARD DIE', '', ''] }) : trayDice(null, { labs: ['1–3 BAT · 4–6 PIT', '', ''] });
+    $('#tray').innerHTML = lr && lr.dice ? trayDice(lr.dice) : trayDice(null);
   }
   function setExplain(html) { const e = $('#explain'); if (e) e.innerHTML = html; }
   function renderPanel() {
@@ -1366,7 +1372,7 @@ function signFA(faId, releaseId) {
       const f = () => {
         const done = performance.now() - t0 > dur;
         for (const i of which) shown[i] = done ? dice[i] : d6();
-        tray.innerHTML = opt && opt.single ? dieHTML(shown[0], { lab: opt.lab || '' }) : trayDice(shown, { cls: [0, 1, 2].map(i => !done && which.includes(i) ? 'rolling' : ''), labs: ['CARD DIE', '', ''] });
+        tray.innerHTML = opt && opt.single ? dieHTML(shown[0], { lab: opt.lab || '' }) : trayDice(shown, { cls: [0, 1, 2].map(i => !done && which.includes(i) ? 'rolling' : ''), labs: [done ? (shown[0] <= 3 ? 'BAT' : 'GLOVE') : 'BAT / GLOVE', '', ''] });
         if (done) res(); else setTimeout(f, 70);
       };
       f();
@@ -1375,7 +1381,7 @@ function signFA(faId, releaseId) {
   }
   function rollText(dice, tactic) {
     const r = readDice(G, dice, tactic);
-    return `Card die <b>${dice[0]}</b> → ${r.src === 'bat' ? "batter's card" : "pitcher's card"} · ${dice[1]} + ${dice[2]} = <b>${r.sum}</b> → <b class="${onBase(r.code) ? (r.code === 'HR' ? 'run' : 'hit') : 'out'}">${OUTCOME[r.code].name}</b>`;
+    return `<b>${r.src === 'bat' ? 'Bat' : 'Glove'}</b> → ${r.src === 'bat' ? "batter's card" : "pitcher's card"} · ${dice[1]} + ${dice[2]} = <b>${r.sum}</b> → <b class="${onBase(r.code) ? (r.code === 'HR' ? 'run' : 'hit') : 'out'}">${OUTCOME[r.code].name}</b>`;
   }
   function showRoll(dice, tactic) {
     const r = readDice(G, dice, tactic);
@@ -1416,7 +1422,7 @@ function signFA(faId, releaseId) {
         if (j >= 0) {
           G.mom[fs]--; banner(`${teamInfo(G[fs]).name} spend ◆`, 'mom', 1200); SFX.play('gem'); renderCards(); await sleep(700);
           dice[j] = d6(); await animRoll(dice, [j], { start: dice }); r = showRoll(dice, tac);
-          setExplain(`They re-rolled your ${j === 0 ? 'card die' : 'white die'}. ` + rollText(dice, tac));
+          setExplain(`They re-rolled your ${j === 0 ? 'bat/glove die' : 'white die'}. ` + rollText(dice, tac));
         }
       }
       await sleep(250);
@@ -1455,7 +1461,7 @@ function signFA(faId, releaseId) {
       if (o >= 0) {
         await sleep(400); G.mom[bs]--; banner(`${teamInfo(G[bs]).name} spend ◆`, 'mom', 1200); SFX.play('gem'); renderCards(); await sleep(700);
         dice[o] = d6(); await animRoll(dice, [o], { start: dice }); r = showRoll(dice, tac);
-        setExplain(`They re-rolled their ${o === 0 ? 'card die' : 'white die'}. ` + rollText(dice, tac));
+        setExplain(`They re-rolled their ${o === 0 ? 'bat/glove die' : 'white die'}. ` + rollText(dice, tac));
       }
       if (onBase(r.code) && G.mom[fs] > 0) {
         const i = await waitReroll('def', dice, tac);

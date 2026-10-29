@@ -8,7 +8,7 @@ On Android, open the link in Chrome and tap **Install on this phone** on the tit
 
 ## How it plays
 
-- Every at-bat is one roll of three dice. The **card die** picks whose card is read (1–3 batter, 4–6 pitcher); the **two white dice** (2–12) point to a box on that card: single, double, home run, strikeout…
+- Every at-bat is one roll of three dice. The **bat/glove die** picks whose card is read (bat: batter, glove: pitcher); the **two white dice** (2–12) point to a box on that card: single, double, home run, strikeout…
 - Both cards are always on screen. Wider boxes are more likely, so you can see the odds.
 - **Momentum ◆**: spend one to re-roll a single die, either to rescue your own out or to cancel the other team's big hit. The game shows the odds for each die before you choose. Earn ◆ with extra-base hits and strikeouts.
 - **Tactics**: Swing, Power (singles become fly outs, doubles become home runs), Bunt, Steal. On defense: bullpen and intentional walks. Pitcher cards wear down as they tire.
