@@ -160,8 +160,8 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 .outs{display:grid; justify-items:center; gap:3px; font-size:10px; font-weight:800; color:var(--muted); letter-spacing:.1em}
 .outs div{display:flex; gap:4px} .outs i{width:12px; height:12px; border-radius:50%; background:#1f3027; border:1px solid #2f4a3a} .outs i.o{background:var(--out); border-color:transparent}
 .gmain{flex:1; min-height:0; overflow-y:auto; display:grid; grid-template-columns:minmax(0,1fr); gap:8px; align-content:start; padding:0 max(10px, env(safe-area-inset-left,0px)) 12px; padding-right:max(10px, env(safe-area-inset-right,0px))}
-.board{position:relative; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:radial-gradient(120% 90% at 50% 100%, #2f6f3c 0%, #1d4a28 60%, #12301b 100%)}
-.board svg{display:block; width:100%; height:auto; max-height:26dvh; margin:0 auto}
+.board{position:relative; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:var(--g1); height:min(72vw, 34dvh, 330px); cursor:pointer}
+.board svg{display:block; width:100%; height:100%}
 .banner{position:absolute; left:50%; top:46%; transform:translate(-50%,-50%) scale(.8); font-family:var(--f-display); font-size:clamp(24px,7.5vw,40px); color:#fff; text-shadow:0 3px 0 #000b, 0 0 22px #000; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .18s, transform .3s cubic-bezier(.2,1.6,.4,1)}
 .banner.show{opacity:1; transform:translate(-50%,-50%) scale(1)}
 .banner.hit{color:var(--hit)} .banner.out{color:var(--out)} .banner.run{color:var(--amber)} .banner.mom{color:#9fd3ff; font-size:clamp(17px,5vw,24px)}
@@ -189,7 +189,8 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 .cell.pick{outline:3px solid #10140f; outline-offset:1px; transform:translateY(-4px) scale(1.08); z-index:2; box-shadow:0 6px 12px #0006}
 .cell.chg::after{content:''; position:absolute; left:3px; right:3px; bottom:2px; height:3px; border-radius:2px; background:#c0392b}
 .cell.pw::after{content:''; position:absolute; left:3px; right:3px; bottom:2px; height:3px; border-radius:2px; background:#1f2620}
-.tray{display:flex; align-items:flex-start; justify-content:center; gap:14px; padding:4px 0 18px}
+.tray{display:flex; align-items:flex-start; justify-content:center; gap:14px; padding:2px 0}
+.tray.lab{padding-bottom:20px}
 .die{appearance:none; width:54px; height:54px; border-radius:12px; border:0; background:#f6f1e3; box-shadow:inset 0 -4px 0 #0002, 0 4px 10px #0007; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); padding:8px; position:relative; color:inherit}
 .die i{width:10px; height:10px; border-radius:50%; background:#1b1b1b; place-self:center; visibility:hidden}
 .die i.on{visibility:visible}
@@ -266,3 +267,39 @@ table.std tr.cut td{border-bottom:2px dashed var(--amber)}
 #confetti{position:fixed; inset:0; pointer-events:none; z-index:60}
 #toast{position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 18px); transform:translateX(-50%) translateY(20px); background:#0b1410; border:1px solid var(--line2); color:var(--text); padding:10px 14px; border-radius:12px; font-size:14px; opacity:0; pointer-events:none; transition:.25s; z-index:70; max-width:90vw}
 #toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+/* ---------- v2.1: compact game, popups, settings, themes ---------- */
+:root{--g1:#2f6d3b; --g2:#2a6436; --dirt:#c27a4b; --infield:#3a7f46; --lines:#f7f4ea}
+:root[data-board="night"]{--g1:#173525; --g2:#132c1f; --dirt:#7d5136; --infield:#1f4530; --lines:#cfe3d6}
+:root[data-board="paper"]{--g1:#e8dfc6; --g2:#e1d7bc; --dirt:#c9a274; --infield:#efe8d4; --lines:#5a4a35}
+:root[data-accent="red"]{--amber:#ff5a5f; --amber-ink:#fff}
+:root[data-accent="ice"]{--amber:#6cc4ff; --amber-ink:#04131f}
+:root[data-accent="lime"]{--amber:#b5e853; --amber-ink:#132003}
+:root[data-cards="contrast"] .pcard{--paper:#ffffff}
+:root[data-cards="contrast"] .k-out{background:#ffffff; color:#000; box-shadow:inset 0 0 0 1.5px #000}
+:root[data-cards="contrast"] .k-dp{background:#d9d9d9; color:#000; box-shadow:inset 0 0 0 1.5px #000}
+:root[data-cards="contrast"] .k-k{background:#b00020; color:#fff} :root[data-cards="contrast"] .k-hit{background:#00843d; color:#fff}
+:root[data-cards="contrast"] .k-bb{background:#0050b5; color:#fff} :root[data-cards="contrast"] .k-xbh{background:#e65c00; color:#000} :root[data-cards="contrast"] .k-hr{background:#ffc400; color:#000}
+.note{position:absolute; left:50%; top:8px; transform:translate(-50%,-8px); width:max-content; max-width:calc(100% - 16px); background:#050b08e8; border:1px solid var(--line2); color:#e3ece5; border-radius:10px; padding:6px 10px; font-size:13px; line-height:1.3; text-align:center; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s}
+.note.show{opacity:1; transform:translate(-50%,0)}
+.note b{color:#fff} .note .hit{color:var(--hit)} .note .out{color:#ffb2a8} .note .run{color:#f5b83d}
+#cards{display:grid; gap:6px}
+.pcard{cursor:pointer; padding:6px 7px 7px}
+.pcard .hd{margin-bottom:5px; gap:7px}
+.pcard .jn{width:26px; height:26px; border-radius:7px}
+.pcard .jn .ico{display:block}
+.pcard .nm{flex:1; min-width:0; font-weight:800; font-stretch:85%; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.pcard .gems{margin:0}
+.tchip{font-size:10px; font-weight:800; letter-spacing:.08em; background:#1f2620; color:#f4eedd; border-radius:5px; padding:2px 6px}
+.tchip.warn{background:#c0392b; color:#fff}
+.actrow{display:flex; gap:6px}
+.actrow .bigbtn{flex:1}
+.btn.side{flex:0 0 74px; padding:6px 4px; display:grid; justify-items:center; align-content:center; font-size:14px; border-radius:14px}
+.btn.side small, .bigbtn.two small{display:block; font-size:11px; font-weight:600; opacity:.75}
+.bigbtn.two{padding:10px 14px; font-size:17px}
+.tac{padding:7px 4px}
+.swatch{width:34px; height:34px; border-radius:50%; background:var(--sw); border:3px solid transparent; box-shadow:0 0 0 1px #0006}
+.swatch.on{border-color:#fff}
+.setlist{display:grid; gap:6px}
+.setrow > span{font-size:14.5px}
+#nMsg{margin:0; font-size:13.5px} #nMsg.err{color:#ffb2a8} #nMsg.ok{color:var(--hit)}

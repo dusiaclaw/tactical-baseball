@@ -10,7 +10,13 @@
   let lastRoll = null; // {dice, tactic, src, idx, code}
   const newOpts = { club: 'ZHE', innings: 3, diff: 'pro', confirm: false };
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const SPEED = () => ((C && C.settings.speed === 'fast') ? .55 : 1) * (REDUCED ? .4 : 1);
+  const SET_KEY = 'tb-settings', NAMES_KEY = 'tb-real-names', NAMES_URL = 'https://www.easyscore.com/stats/2026/10143/0/off';
+  const SET = Object.assign({ sound: true, vibrate: true, speed: 'normal', accent: 'amber', board: 'day', cards: 'classic', odds: true, names: 'fictional' }, (() => { try { return JSON.parse(localStorage.getItem(SET_KEY) || '{}'); } catch (e) { return {}; } })());
+  function saveSet() { try { localStorage.setItem(SET_KEY, JSON.stringify(SET)); } catch (e) { } applyLook(); }
+  function applyLook() { const r = document.documentElement; r.dataset.accent = SET.accent; r.dataset.board = SET.board; r.dataset.cards = SET.cards; }
+  applyLook();
+  const SPEED = () => (SET.speed === 'fast' ? .55 : 1) * (REDUCED ? .4 : 1);
+  let backTo = 'title';
   const sleep = ms => new Promise(r => setTimeout(r, ms * SPEED()));
   const tween = (ms, fn) => new Promise(res => { const d = Math.max(1, ms * SPEED()), t0 = performance.now(); const f = t => { const k = Math.min(1, (t - t0) / d); fn(k); k < 1 ? requestAnimationFrame(f) : res(); }; requestAnimationFrame(f); });
   const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
@@ -18,6 +24,7 @@
   const RLAB = { con: 'CON', pow: 'POW', spd: 'SPD', eye: 'EYE', stu: 'STU', ctl: 'CTL', sta: 'STA' };
   const RDESC = { con: 'more singles, fewer strikeouts', pow: 'more doubles and home runs', spd: 'triples, steals, scoring from first and second', eye: 'more walks', stu: 'more strikeouts, fewer hits', ctl: 'fewer walks', sta: 'batters faced before the card wears down' };
   const ICON_MENU = '<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+  const ICON_GEAR = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>';
   const ICON_BACK = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
   const KIND = c => ({ HR: 'k-hr', '3B': 'k-xbh', '2B': 'k-xbh', '1B': 'k-hit', BB: 'k-bb', K: 'k-k', GB: 'k-out', FB: 'k-out', DP: 'k-dp' })[c];
   const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -43,7 +50,7 @@
     noise(dur, f, q, vol, type, at) { const a = this.ctx, s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(), t = a.currentTime + (at || 0); s.buffer = this.nb; fl.type = type || 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); s.connect(fl); fl.connect(g); g.connect(a.destination); s.start(t); s.stop(t + dur + .05); },
     tone(f1, f2, dur, vol, type, at) { const a = this.ctx, o = a.createOscillator(), g = a.createGain(), t = a.currentTime + (at || 0); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + .05); },
     play(k) {
-      if (!C || !C.settings.sound) return; this.init(); if (!this.ctx) return;
+      if (!SET.sound) return; this.init(); if (!this.ctx) return;
       try {
         if (k === 'dice') { for (let i = 0; i < 5; i++) { this.noise(.035, 2200 + Math.random() * 1500, 2, .35, 'bandpass', i * .07 + Math.random() * .03); } }
         else if (k === 'crack') { this.noise(.09, 2600, .8, .9, 'highpass'); this.tone(900, 300, .05, .25, 'triangle'); }
@@ -56,7 +63,7 @@
       } catch (e) { }
     }
   };
-  const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) { } };
+  const buzz = ms => { if (!SET.vibrate) return; try { navigator.vibrate && navigator.vibrate(ms); } catch (e) { } };
 
   /* ---------- shared graphics ---------- */
   function badge(id, size) {
@@ -91,13 +98,15 @@
         ${saved ? `<button class="btn primary" id="tContinue">Continue<small>${sub}</small></button>` : ''}
         <button class="btn ${saved ? '' : 'primary'}" id="tNew">New campaign</button>
         <button class="btn" id="tHow">How to play</button>
+        <button class="btn" id="tSet">Settings</button>
         <button class="btn ghost" id="tInstall" ${installEvt ? '' : 'hidden'}>Install on this phone</button>
       </div>
-      <p class="foot">Fan-made game inspired by the Swiss baseball leagues. Not affiliated with or endorsed by the SBSF or any club. All players are fictional. v${VERSION}</p>
+      <p class="foot">Fan-made game inspired by the Swiss baseball leagues. Not affiliated with or endorsed by the SBSF or any club. ${realNamesOn() ? 'Player names come from public league stats, stored only on this device.' : 'All players are fictional.'} v${VERSION}</p>
     </section>`;
     if (saved) $('#tContinue').onclick = () => { SFX.init(); go('hub'); };
     $('#tNew').onclick = () => { newOpts.confirm = false; go('new'); };
     $('#tHow').onclick = howTo;
+    $('#tSet').onclick = () => openSettings('title');
     $('#tInstall').onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) { } installEvt = null; $('#tInstall').hidden = true; };
   }
   function titleArt() {
@@ -131,7 +140,7 @@
     $('#nDiff').onclick = e => { const b = e.target.closest('.diff'); if (!b) return; newOpts.diff = b.dataset.d; renderNew(); };
     $('#nStart').onclick = () => {
       if (existing && !newOpts.confirm) { newOpts.confirm = true; renderNew(); return; }
-      SFX.init(); newCampaign(newOpts); save(); hubTab = 'next'; go('hub');
+      SFX.init(); newCampaign(newOpts); applyNames(); save(); hubTab = 'next'; go('hub');
     };
   }
 
@@ -143,12 +152,13 @@
     const tpTotal = team.players.reduce((a, p) => a + p.tp, 0);
     const phaseTxt = C.phase === 'season' ? `Season ${C.season} · Week ${Math.min(C.week + 1, C.schedule.length)} of ${C.schedule.length}` : C.phase === 'playoffs' ? `Season ${C.season} · Playoffs` : `Season ${C.season} · Complete`;
     app.innerHTML = `<header class="hubhead"><div class="wrap">
-      <div class="hubtop">${badge(C.club, 44)}<div class="nm"><h2>${t.city} ${t.name}</h2><p>${phaseTxt}</p></div><button class="iconbtn" id="hHome" aria-label="Title screen">${ICON_MENU}</button></div>
+      <div class="hubtop">${badge(C.club, 44)}<div class="nm"><h2>${t.city} ${t.name}</h2><p>${phaseTxt}</p></div><button class="iconbtn" id="hSet" aria-label="Settings">${ICON_GEAR}</button><button class="iconbtn" id="hHome" aria-label="Title screen">${ICON_MENU}</button></div>
       <div class="stats3"><div class="stat"><small>Record</small><b>${recordOf(C.club)}</b></div><div class="stat"><small>Club funds</small><b>Fr. ${C.credits}</b></div><div class="stat"><small>Titles</small><b>${C.titles}</b></div></div>
       <nav class="tabs" id="hTabs">${[['next', 'Next'], ['table', 'Table'], ['roster', 'Roster'], ['scout', 'Scouting'], ['club', 'Club']].map(([k, l]) => `<button class="tab ${hubTab === k ? 'on' : ''}" data-t="${k}">${l}${k === 'roster' && tpTotal ? `<span class="tp">${tpTotal}</span>` : ''}</button>`).join('')}</nav>
     </div></header>
     <main class="hubbody wrap" id="hBody"></main>`;
     $('#hHome').onclick = () => go('title');
+    $('#hSet').onclick = () => openSettings('hub');
     $('#hTabs').onclick = e => { const b = e.target.closest('.tab'); if (!b) return; hubTab = b.dataset.t; renderHub(); };
     ({ next: tabNext, table: tabTable, roster: tabRoster, scout: tabScout, club: tabClub })[hubTab]($('#hBody'));
   }
@@ -293,37 +303,150 @@
     };
   }
   function tabClub(body) {
-    const s = C.settings;
-    body.innerHTML = `<section class="card" style="display:grid;gap:4px"><div class="eyebrow">Settings</div>
-      <div class="setrow"><span>Game length</span><div class="chips" id="cInn">${[3, 5, 7].map(n => `<button class="chip ${C.innings === n ? 'on' : ''}" data-n="${n}">${n} inn</button>`).join('')}</div></div>
-      <div class="setrow"><span>Difficulty</span><div class="chips" id="cDiff">${['rookie', 'pro', 'legend'].map(d => `<button class="chip ${C.diff === d ? 'on' : ''}" data-d="${d}">${d[0].toUpperCase() + d.slice(1)}</button>`).join('')}</div></div>
-      <div class="setrow"><span>Sound</span><div class="chips" id="cSnd"><button class="chip ${s.sound ? 'on' : ''}" data-v="1">On</button><button class="chip ${!s.sound ? 'on' : ''}" data-v="0">Off</button></div></div>
-      <div class="setrow"><span>Animation speed</span><div class="chips" id="cSpd"><button class="chip ${s.speed !== 'fast' ? 'on' : ''}" data-v="normal">Normal</button><button class="chip ${s.speed === 'fast' ? 'on' : ''}" data-v="fast">Fast</button></div></div>
-      <p class="muted" style="margin:4px 0 0;font-size:12.5px">Game length and difficulty apply from the next game. Difficulty changes how the bot spends momentum, not the rosters.</p></section>
-      <section class="card"><div class="eyebrow">Club history</div><div class="seasons" style="margin-top:6px">
+    body.innerHTML = `<section class="card"><div class="eyebrow">Club history</div><div class="seasons" style="margin-top:6px">
         <div><span>All-time record</span><b class="num">${C.allW}–${C.allL}</b></div><div><span>Swiss titles</span><b class="num">${C.titles}</b></div>
         ${C.hist.map(h => `<div><span>Season ${h.season}: ${h.w}–${h.l}, ${ordinal(h.place)}</span><b>${{ champion: 'Champions', runnerup: 'Final', semi: 'Semifinal', missed: 'No playoffs' }[h.outcome] || ''}</b></div>`).join('')}
       </div></section>
-      <section class="card" style="display:grid;gap:10px"><div class="eyebrow">Backup</div><p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">Your campaign saves on this device after every roll. Export a backup file to move it to another phone or keep it safe.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cExport" style="flex:1">Export backup</button><button class="btn" id="cImport" style="flex:1">Restore backup</button><input type="file" id="cFile" accept="application/json,.json" hidden></div></section>
-      <section class="card" style="display:grid;gap:10px"><div class="eyebrow">Help</div><button class="btn" id="cHow">How to play</button><button class="btn danger" id="cReset">Start a new campaign</button></section>`;
-    $('#cInn').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; C.innings = +b.dataset.n; save(); renderHub(); };
-    $('#cDiff').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; C.diff = b.dataset.d; save(); renderHub(); };
-    $('#cSnd').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; s.sound = b.dataset.v === '1'; save(); renderHub(); };
-    $('#cSpd').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; s.speed = b.dataset.v; save(); renderHub(); };
+      <button class="btn block" id="cSet">Settings, look and backup</button><button class="btn block" id="cHow">How to play</button>`;
+    $('#cSet').onclick = () => openSettings('hub');
     $('#cHow').onclick = howTo;
-    $('#cReset').onclick = () => { newOpts.confirm = true; go('new'); };
-    $('#cExport').onclick = () => {
-      try { const blob = new Blob([JSON.stringify(C)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `tactical-baseball-${teamInfo(C.club).name.toLowerCase()}-season${C.season}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800); toast('Backup file saved.'); }
-      catch (e) { toast('Export failed on this device.'); }
+  }
+
+  /* =================== SETTINGS =================== */
+  function openSettings(from) { backTo = from; go('settings'); }
+  function seg(id, cur, opts) { return `<div class="chips" id="${id}">${opts.map(([v, l]) => `<button class="chip ${String(cur) === String(v) ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div>`; }
+  function renderSettings() {
+    const names = loadNames();
+    const sw = (v, col, l) => `<button class="swatch ${SET.accent === v ? 'on' : ''}" data-v="${v}" style="--sw:${col}" aria-label="${l}"></button>`;
+    app.innerHTML = `<section class="page wrap">
+      <div style="display:flex;gap:10px;align-items:center"><button class="iconbtn" id="sBack" aria-label="Back">${ICON_BACK}</button><h2 style="font-size:26px">Settings</h2></div>
+      ${C ? `<section class="card setlist"><div class="eyebrow">Gameplay</div>
+        <div class="setrow"><span>Game length</span>${seg('sInn', C.innings, [[3, '3 inn'], [5, '5 inn'], [7, '7 inn']])}</div>
+        <div class="setrow"><span>Difficulty</span>${seg('sDiff', C.diff, [['rookie', 'Rookie'], ['pro', 'Pro'], ['legend', 'Legend']])}</div></section>` : ''}
+      <section class="card setlist"><div class="eyebrow">Look</div>
+        <div class="setrow"><span>Accent colour</span><div class="chips" id="sAcc">${sw('amber', '#f5b83d', 'Amber')}${sw('red', '#ff5a5f', 'Swiss red')}${sw('ice', '#6cc4ff', 'Ice blue')}${sw('lime', '#b5e853', 'Lime')}</div></div>
+        <div class="setrow"><span>Field</span>${seg('sBoard', SET.board, [['day', 'Day'], ['night', 'Night'], ['paper', 'Paper']])}</div>
+        <div class="setrow"><span>Card colours</span>${seg('sCards', SET.cards, [['classic', 'Classic'], ['contrast', 'High contrast']])}</div></section>
+      <section class="card setlist"><div class="eyebrow">Sound and feel</div>
+        <div class="setrow"><span>Sound</span>${seg('sSnd', SET.sound, [[true, 'On'], [false, 'Off']])}</div>
+        <div class="setrow"><span>Vibration</span>${seg('sVib', SET.vibrate, [[true, 'On'], [false, 'Off']])}</div>
+        <div class="setrow"><span>Animations</span>${seg('sSpd', SET.speed, [['normal', 'Normal'], ['fast', 'Fast']])}</div>
+        <div class="setrow"><span>Show odds</span>${seg('sOdds', SET.odds, [[true, 'On'], [false, 'Off']])}</div></section>
+      <section class="card setlist"><div class="eyebrow">Player names</div>
+        <p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">${names ? `Real names saved on this phone: ${names.count} players from ${Object.keys(names.teams).length} clubs (${new Date(names.at).toLocaleDateString()}).` : 'Using fictional names.'}</p>
+        <div class="setrow"><span>Names in game</span>${seg('sNames', realNamesOn() ? 'real' : 'fictional', [['fictional', 'Fictional'], ['real', 'Real']])}</div>
+        <button class="btn" id="sLoad">${names ? 'Update real names' : 'Load real names'}</button></section>
+      ${C ? `<section class="card setlist"><div class="eyebrow">Backup</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cExport" style="flex:1">Export backup</button><button class="btn" id="cImport" style="flex:1">Restore backup</button><input type="file" id="cFile" accept="application/json,.json" hidden></div>
+        <button class="btn danger" id="cReset">Start a new campaign</button></section>` : ''}
+    </section>`;
+    const bindSeg = (id, fn) => { const el = $('#' + id); if (el) el.onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; fn(b.dataset.v); SFX.play('tap'); renderSettings(); }; };
+    $('#sBack').onclick = () => go(backTo === 'game' && C && C.game ? 'game' : backTo === 'hub' && C ? 'hub' : 'title');
+    bindSeg('sInn', v => { C.innings = +v; save(); }); bindSeg('sDiff', v => { C.diff = v; save(); });
+    bindSeg('sAcc', v => { SET.accent = v; saveSet(); }); bindSeg('sBoard', v => { SET.board = v; saveSet(); }); bindSeg('sCards', v => { SET.cards = v; saveSet(); });
+    bindSeg('sSnd', v => { SET.sound = v === 'true'; saveSet(); }); bindSeg('sVib', v => { SET.vibrate = v === 'true'; saveSet(); });
+    bindSeg('sSpd', v => { SET.speed = v; saveSet(); }); bindSeg('sOdds', v => { SET.odds = v === 'true'; saveSet(); });
+    bindSeg('sNames', v => { if (v === 'real' && !loadNames()) { namesSheet(); return; } SET.names = v; saveSet(); applyNames(); });
+    $('#sLoad').onclick = namesSheet;
+    if (C) {
+      $('#cReset').onclick = () => { newOpts.confirm = true; go('new'); };
+      $('#cExport').onclick = () => {
+        try { const blob = new Blob([JSON.stringify(C)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `tactical-baseball-${teamInfo(C.club).name.toLowerCase()}-season${C.season}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800); toast('Backup file saved.'); }
+        catch (e) { toast('Export failed on this device.'); }
+      };
+      $('#cImport').onclick = () => $('#cFile').click();
+      $('#cFile').onchange = e => {
+        const f = e.target.files[0]; if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => { try { const c = JSON.parse(rd.result); if (!c || c.v !== 2 || !c.teams || !c.club) throw 0; C = c; G = C.game; indexPlayers(); applyNames(); save(); toast('Backup restored.'); renderSettings(); } catch (err) { toast('That file is not a Tactical Baseball backup.'); } };
+        rd.readAsText(f);
+      };
+    }
+  }
+
+  /* =================== REAL PLAYER NAMES =================== */
+  const TEAM_KEYS = [[/eighters/i, 'ZHE'], [/flyers|therwil/i, 'THF'], [/cardinals|\bbern\b/i, 'BEC'], [/barracudas/i, 'ZHB'], [/challengers/i, 'ZHC'], [/eagles|luzern|lucerne/i, 'LUE'], [/frogs|sissach/i, 'SIF'], [/unicorns|h[uü]nenberg/i, 'HUU']];
+  function loadNames() { try { const n = JSON.parse(localStorage.getItem(NAMES_KEY) || 'null'); return n && n.teams ? n : null; } catch (e) { return null; } }
+  const realNamesOn = () => SET.names === 'real' && !!loadNames();
+  function parseNames(raw) {
+    let lines;
+    if (/<table|<tr/i.test(raw)) {
+      const doc = new DOMParser().parseFromString(raw, 'text/html');
+      lines = [...doc.querySelectorAll('tr, h1, h2, h3, h4, caption')].map(r => [...r.children].length ? [...r.children].map(c => c.textContent.trim()).join('\t') : r.textContent.trim());
+    } else lines = raw.split(/\r?\n/);
+    const teams = {}; let cur = null;
+    const W = "[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’\\-]+";
+    const reComma = new RegExp(`(${W}(?: ${W})*),\\s*(${W}(?:[ -]${W})?)`), reSpace = new RegExp(`^(${W}(?:[ -]${W})?)\\s+(${W}(?:[ -]${W})*)$`);
+    for (const ln of lines) {
+      if (!ln || !ln.trim()) continue;
+      const tm = TEAM_KEYS.find(([re]) => re.test(ln));
+      const cells = ln.split(/\t|\s{2,}|\|/).map(c => c.trim()).filter(Boolean);
+      let first = null, last = null;
+      for (const c of cells) {
+        if (TEAM_KEYS.some(([re]) => re.test(c)) || /\d/.test(c)) continue;
+        let m = c.match(reComma); if (m) { last = m[1]; first = m[2]; break; }
+        m = c.match(reSpace); if (m && c.length < 40) { first = m[1]; last = m[2]; break; }
+      }
+      if (tm && !first) { cur = tm[1]; continue; }
+      const team = tm ? tm[1] : cur;
+      if (!team || !first) continue;
+      const list = teams[team] || (teams[team] = []);
+      if (!list.some(n => n.first === first && n.last === last)) list.push({ first, last });
+    }
+    const count = Object.values(teams).reduce((a, l) => a + l.length, 0);
+    return { teams, count };
+  }
+  function applyNames() {
+    if (!C) return;
+    const n = realNamesOn() ? loadNames() : null;
+    for (const id in C.teams) {
+      const t = C.teams[id];
+      const hitters = [...t.lineup.map(s => getP(s.id)), ...t.bench.map(getP)];
+      const list = n && n.teams[id] ? n.teams[id] : [];
+      hitters.forEach((p, i) => {
+        if (!p.gn) p.gn = [p.first, p.last];
+        if (list[i]) { p.first = list[i].first; p.last = list[i].last; } else { p.first = p.gn[0]; p.last = p.gn[1]; }
+      });
+    }
+    save();
+  }
+  function namesSheet() {
+    let found = null;
+    const show = (msg, cls) => { const el = $('#nMsg'); if (el) { el.innerHTML = msg; el.className = cls || ''; } };
+    const preview = res => {
+      found = res;
+      const per = Object.entries(res.teams).map(([id, l]) => `${teamInfo(id).name} ${l.length}`).join(' · ');
+      show(res.count ? `Found <b>${res.count}</b> players. ${per}.` : 'No players from the eight clubs found in that text.', res.count ? 'ok' : 'err');
+      $('#nUse').disabled = !res.count;
     };
-    $('#cImport').onclick = () => $('#cFile').click();
-    $('#cFile').onchange = e => {
-      const f = e.target.files[0]; if (!f) return;
-      const rd = new FileReader();
-      rd.onload = () => { try { const c = JSON.parse(rd.result); if (!c || c.v !== 2 || !c.teams || !c.club) throw 0; C = c; G = C.game; indexPlayers(); save(); toast('Backup restored.'); hubTab = 'next'; renderHub(); } catch (err) { toast('That file is not a Tactical Baseball backup.'); } };
-      rd.readAsText(f);
-    };
+    openSheet(`<h3>Load real player names</h3>
+      <p>Names come from the league stats page and are saved only on this phone. Batting stats list hitters, so pitchers keep fictional names. Each club's names fill its lineup and bench in order.</p>
+      <button class="btn primary" id="nFetch">Fetch from easyscore.com</button>
+      <p id="nMsg"></p>
+      <details id="nPasteBox"><summary class="eyebrow" style="cursor:pointer">Or paste the table yourself</summary>
+        <p style="font-size:13.5px;margin-top:8px">Open the <a href="${NAMES_URL}" target="_blank" rel="noopener" style="color:var(--amber)">stats page</a>, select the whole table, copy it, and paste it here.</p>
+        <textarea id="nText" rows="6" style="width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--line2);border-radius:10px;padding:8px;font:13px var(--f-ui)" placeholder="Paste the stats table here"></textarea>
+        <button class="btn" id="nParse" style="margin-top:6px">Read names</button></details>
+      <div class="row2"><button class="btn" data-a="close">Cancel</button><button class="btn primary" id="nUse" disabled>Use these names</button></div>`, sh => {
+      $('#nFetch').onclick = async () => {
+        show('Fetching…');
+        try {
+          const r = await fetch(NAMES_URL, { mode: 'cors' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          preview(parseNames(await r.text()));
+        } catch (e) {
+          show("The stats site doesn't let other apps read its pages directly, so the fetch was blocked. Use the paste option below instead.", 'err');
+          $('#nPasteBox').open = true;
+        }
+      };
+      $('#nParse').onclick = () => preview(parseNames($('#nText').value));
+      $('#nUse').onclick = () => {
+        if (!found || !found.count) return;
+        try { localStorage.setItem(NAMES_KEY, JSON.stringify({ at: Date.now(), source: NAMES_URL, teams: found.teams, count: found.count })); } catch (e) { toast('Could not save the names.'); return; }
+        SET.names = 'real'; saveSet(); applyNames(); closeSheet(); toast(`${found.count} real names saved.`); if (screen === 'settings') renderSettings();
+      };
+      sh.querySelector('[data-a="close"]').onclick = closeSheet;
+    });
   }
 
   /* =================== HOW TO PLAY =================== */
@@ -367,12 +490,12 @@
   /* =================== GAME SCREEN =================== */
   const BP = [[150, 156], [228, 94], [150, 32], [72, 94]]; // home, 1B, 2B, 3B on the board
   function boardStatic() {
-    return `<defs><pattern id="mw" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="20" height="20" fill="#2f6d3b"/><rect width="10" height="20" fill="#2a6436"/></pattern></defs>
+    return `<defs><pattern id="mw" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="20" height="20" style="fill:var(--g1)"/><rect width="10" height="20" style="fill:var(--g2)"/></pattern></defs>
       <rect x="0" y="0" width="300" height="180" fill="url(#mw)"/>
-      <path d="M150 176 L248 94 L150 12 L52 94 Z" fill="#c27a4b"/>
-      <path d="M150 148 L218 94 L150 40 L82 94 Z" fill="#3a7f46"/>
+      <path d="M150 176 L248 94 L150 12 L52 94 Z" style="fill:var(--dirt)"/>
+      <path d="M150 148 L218 94 L150 40 L82 94 Z" style="fill:var(--infield)"/>
       <circle cx="150" cy="94" r="9" fill="#cc8656"/><rect x="146" y="93" width="8" height="2" fill="#f7f4ea"/>
-      <path d="M150 156 L10 16 M150 156 L290 16" stroke="#f7f4ea" stroke-width="1.5" opacity=".6"/>
+      <path d="M150 156 L10 16 M150 156 L290 16" style="stroke:var(--lines)" stroke-width="1.5" opacity=".6"/>
       ${[1, 2, 3].map(i => `<rect x="${BP[i][0] - 7}" y="${BP[i][1] - 7}" width="14" height="14" fill="#f7f4ea" transform="rotate(45 ${BP[i][0]} ${BP[i][1]})"/>`).join('')}
       <path d="M144 152h12v6l-6 6l-6-6z" fill="#f7f4ea"/>
       <g id="Lrun"></g><g id="Lbat"></g>`;
@@ -385,13 +508,14 @@
     app.innerHTML = `<div class="game">
       <div class="gbar"><button class="iconbtn" id="gMenu" aria-label="Game menu">${ICON_MENU}</button><div class="bug" id="bug"></div><div class="outs" id="outs"></div></div>
       <div class="gmain">
-        <div class="board"><svg id="boardSvg" viewBox="0 0 300 180" role="img" aria-label="Bases">${boardStatic()}</svg><div class="banner" id="banner"></div></div>
-        <div id="cards" style="display:grid;gap:8px"></div>
+        <div class="board" id="board"><svg id="boardSvg" viewBox="44 6 212 174" role="img" aria-label="Bases">${boardStatic()}</svg><div class="banner" id="banner"></div><div class="note" id="note"></div></div>
+        <div id="cards"></div>
         <div class="tray" id="tray"></div>
-        <div class="explain" id="explain"></div>
         <div id="panel" style="display:grid;gap:8px"></div>
       </div></div>`;
     $('#gMenu').onclick = gameMenu;
+    $('#board').onclick = () => { if (lastNote) setExplain(lastNote); };
+    $('#cards').onclick = e => { const c = e.target.closest('[data-card]'); if (c && !phase) cardInfo(c.dataset.card); };
     updateGame();
     if (G.over) setTimeout(showGameOver, 300);
   }
@@ -413,82 +537,97 @@
     const bs = batSide(G), fs = fieldSide(G), bat = curBatter(G), pit = curPitcher(G), bt = teamInfo(G[bs]), ft = teamInfo(G[fs]);
     const tac = curTactic(), cards = cardsNow(G, tac === 'bunt' ? 'swing' : tac);
     const lr = lastRoll && lastRoll.seq === G.seq ? lastRoll : null;
-    const slot = G.gl[bs][G.bi[bs]];
-    const bsum = cardSummary(cards.bat), f = cards.f;
-    const box = G.box[bat.id], today = box && box.pa ? `${box.h}-for-${box.ab}${box.hr ? `, ${box.hr} HR` : ''}` : 'first time up';
+    const f = cards.f;
     const batCls = lr ? (lr.src === 'bat' ? 'live' : 'dim') : '', pitCls = lr ? (lr.src === 'pit' ? 'live' : 'dim') : '';
+    const chip = tac !== 'swing' ? `<span class="tchip">${tac === 'power' ? 'POWER' : 'BUNT'}</span>` : '';
     $('#cards').innerHTML = `
-      <div class="pcard ${batCls}"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${bat.num}</span><div class="who"><b>${short(bat)} · ${slot.pos}</b><small>${keyRatings(bat)} · ${today}</small></div><div class="tag">BATTER ${icon(true, 13)}${tac === 'power' ? '<br><span style="color:#1f2620">POWER</span>' : ''}${gems(bs)}</div></div>
+      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${chip}${gems(bs)}</div>
         ${stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
-      <div class="pcard ${pitCls}"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${pit.num}</span><div class="who"><b>${short(pit)} · ${pit.hand}HP</b><small>${keyRatings(pit)} · ${G.bf[fs]} batters${f > 0 ? ' · <span class="tired">tiring</span>' : ''}</small></div><div class="tag">PITCHER ${icon(false, 13)}${gems(fs)}</div></div>
+      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${f > 0 ? '<span class="tchip warn">TIRED</span>' : ''}${gems(fs)}</div>
         ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
+  }
+  function cardInfo(which) {
+    const bs = batSide(G), fs = fieldSide(G);
+    if (which === 'bat') {
+      const p = curBatter(G), b = G.box[p.id], slot = G.gl[bs][G.bi[bs]], sm = cardSummary(batterCard(p, 'swing'));
+      openSheet(`<div class="eyebrow">${teamInfo(G[bs]).name} · batting ${G.bi[bs] + 1}${['st', 'nd', 'rd'][G.bi[bs]] || 'th'} · ${slot.pos}</div><h3>#${p.num} ${p.first} ${p.last}</h3>
+        <p class="num">${keyRatings(p)} · bats ${p.hand}</p><p>On base ${pct(sm.ob)} · home run ${pct(sm.hr)} · strikeout ${pct(sm.k)} on his card.</p>
+        <p>Today: ${b && b.pa ? `${b.h}-for-${b.ab}${b.hr ? `, ${b.hr} HR` : ''}${b.rbi ? `, ${b.rbi} RBI` : ''}${b.bb ? `, ${b.bb} BB` : ''}` : 'first time up'}.</p>
+        <p class="muted" style="font-size:13px">◆ ${G.mom[bs]} momentum for ${teamInfo(G[bs]).name}. Gems re-roll one die each.</p><button class="btn block" data-a="close">Close</button>`, s => s.querySelector('[data-a]').onclick = closeSheet);
+    } else {
+      const p = curPitcher(G), b = G.box[p.id], f = fatigueOf(G, fs), sm = cardSummary(pitcherCard(p, 0));
+      openSheet(`<div class="eyebrow">${teamInfo(G[fs]).name} · pitching</div><h3>#${p.num} ${p.first} ${p.last}</h3>
+        <p class="num">${keyRatings(p)} · ${p.hand}HP</p><p>Outs ${pct(1 - sm.ob)} · strikeouts ${pct(sm.k)} on his card when fresh.</p>
+        <p>${G.bf[fs]} batters faced. ${f > 0 ? 'Tired: boxes marked red have turned into hits.' : `Fresh for about ${Math.max(0, Math.round(pitchCap(p) - G.bf[fs]))} more batters.`}</p>
+        <p class="muted" style="font-size:13px">◆ ${G.mom[fs]} momentum for ${teamInfo(G[fs]).name}.</p><button class="btn block" data-a="close">Close</button>`, s => s.querySelector('[data-a]').onclick = closeSheet);
+    }
   }
   function trayDice(dice, opt) {
     opt = opt || {};
     const bs = batSide(G), fs = fieldSide(G);
     const owner = dice && dice[0] ? (dice[0] <= 3 ? teamInfo(G[bs]).c1 : teamInfo(G[fs]).c1) : null;
-    const labs = opt.labs || [dice && dice[0] ? (dice[0] <= 3 ? 'BAT' : 'GLOVE') : 'BAT / GLOVE', '', ''];
+    const labs = opt.labs || ['', '', ''];
     return dieHTML(dice ? dice[0] : 0, { card: true, color: owner, idx: 0, cls: opt.cls && opt.cls[0], lab: labs[0], labCls: opt.labCls }) +
       dieHTML(dice ? dice[1] : 0, { idx: 1, cls: opt.cls && opt.cls[1], lab: labs[1], labCls: opt.labCls }) +
       dieHTML(dice ? dice[2] : 0, { idx: 2, cls: opt.cls && opt.cls[2], lab: labs[2], labCls: opt.labCls });
   }
   function renderTray() {
-    if (G.over) { $('#tray').innerHTML = ''; return; }
+    const T = $('#tray');
+    if (G.over) { T.innerHTML = ''; return; }
     if (phase && phase.kind === 'reroll') {
-      const labs = [0, 1, 2].map(i => { const p = phase.role === 'off' ? rerollGood(G, phase.dice, i, phase.tactic) : 1 - rerollGood(G, phase.dice, i, phase.tactic); return `${pct(p)} ${phase.role === 'off' ? 'safe' : 'out'}`; });
-      $('#tray').innerHTML = trayDice(phase.dice, { cls: ['pickable', 'pickable', 'pickable'], labs, labCls: 'odds' });
-      $('#tray').onclick = e => { const d = e.target.closest('[data-die]'); if (!d || !phase) return; const r = phase.resolve; phase = null; r(+d.dataset.die); };
+      const labs = SET.odds ? [0, 1, 2].map(i => { const p = phase.role === 'off' ? rerollGood(G, phase.dice, i, phase.tactic) : 1 - rerollGood(G, phase.dice, i, phase.tactic); return `${pct(p)} ${phase.role === 'off' ? 'safe' : 'out'}`; }) : ['', '', ''];
+      T.classList.toggle('lab', SET.odds);
+      T.innerHTML = trayDice(phase.dice, { cls: ['pickable', 'pickable', 'pickable'], labs, labCls: 'odds' });
+      T.onclick = e => { const d = e.target.closest('[data-die]'); if (!d || !phase) return; const r = phase.resolve; phase = null; r(+d.dataset.die); };
       return;
     }
-    $('#tray').onclick = null;
+    T.classList.remove('lab'); T.onclick = null;
     const lr = lastRoll && lastRoll.seq === G.seq ? lastRoll : null;
-    $('#tray').innerHTML = lr && lr.dice ? trayDice(lr.dice) : trayDice(null);
+    T.innerHTML = lr && lr.dice ? trayDice(lr.dice) : trayDice(null);
   }
-  function setExplain(html) { const e = $('#explain'); if (e) e.innerHTML = html; }
+  let lastNote = '', noteT = null;
+  function setExplain(html) {
+    if (!html) return; lastNote = html;
+    const n = $('#note'); if (!n) return;
+    n.innerHTML = html; n.classList.add('show');
+    clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('show'), 3200 * Math.max(.7, SPEED()));
+  }
   function renderPanel() {
     const P = $('#panel');
     if (G.over) { P.innerHTML = `<button class="btn primary bigbtn" id="gOver">See the final</button>`; $('#gOver').onclick = showGameOver; return; }
     const dis = busy ? 'disabled' : '';
-    const last = G.log[0];
-    const ticker = `<button class="ticker" id="gTicker">${last ? last.txt : ''}</button>`;
     if (phase && phase.kind === 'reroll') {
       const cur = readDice(G, phase.dice, phase.tactic).code;
       P.innerHTML = phase.role === 'off'
-        ? `<p class="hintline">Tap a die to re-roll it for ◆1 (you have ${G.mom[G.human]}). Each die shows your chance to reach base after re-rolling it.</p><button class="btn primary bigbtn" id="gKeep">Keep it: ${OUTCOME[cur].name}</button>`
-        : `<p class="hintline">Spend ◆1 (you have ${G.mom[G.human]}) to re-roll one of their dice? Each die shows the chance of an out after re-rolling it.</p><button class="btn bigbtn" id="gKeep">Let it stand: ${OUTCOME[cur].name}</button>`;
+        ? `<button class="btn primary bigbtn two" id="gKeep">Keep: ${OUTCOME[cur].name}<small>or tap a die to re-roll · ◆1 of ${G.mom[G.human]}</small></button>`
+        : `<button class="btn bigbtn two" id="gKeep">Let it stand: ${OUTCOME[cur].name}<small>or tap one of their dice · ◆1 of ${G.mom[G.human]}</small></button>`;
       $('#gKeep').onclick = () => { if (!phase) return; const r = phase.resolve; phase = null; r(-1); };
       return;
     }
     if (humanBatting()) {
       const tac = G.tactic || 'swing', si = stealInfo(G), bench = G.bench[batSide(G)];
       const sw = tacticOdds(G, 'swing'), pw = tacticOdds(G, 'power'), bn = tacticOdds(G, 'bunt');
-      const anyOn = G.bases.some(Boolean);
+      const o = (t, x) => SET.odds ? `<small>${x}</small>` : '';
       P.innerHTML = `
         <div class="tactics">
-          <button class="tac ${tac === 'swing' ? 'on' : ''}" data-t="swing" ${dis}><b>Swing</b><small>safe ${pct(sw.ob)} · HR ${pct(sw.hr)}</small></button>
-          <button class="tac ${tac === 'power' ? 'on' : ''}" data-t="power" ${dis}><b>Power</b><small>safe ${pct(pw.ob)} · HR ${pct(pw.hr)}</small></button>
-          <button class="tac ${tac === 'bunt' ? 'on' : ''}" data-t="bunt" ${dis}><b>Bunt</b><small>${anyOn ? `runners up · hit ${pct(bn.ob)}` : `hit ${pct(bn.ob)}`}</small></button>
+          <button class="tac ${tac === 'swing' ? 'on' : ''}" data-t="swing" ${dis}><b>Swing</b>${o('swing', `${pct(sw.ob)} · HR ${pct(sw.hr)}`)}</button>
+          <button class="tac ${tac === 'power' ? 'on' : ''}" data-t="power" ${dis}><b>Power</b>${o('power', `${pct(pw.ob)} · HR ${pct(pw.hr)}`)}</button>
+          <button class="tac ${tac === 'bunt' ? 'on' : ''}" data-t="bunt" ${dis}><b>Bunt</b>${o('bunt', `hit ${pct(bn.ob)}`)}</button>
         </div>
-        <button class="btn primary bigbtn" id="gRoll" ${dis}>${tac === 'bunt' ? 'Bunt · roll 1 die' : 'Roll the dice'}</button>
-        <div class="subrow">${si ? `<button class="btn" id="gSteal" ${dis}>Steal ${ordinal(si.from + 1)} · ${stealNeed(G)}+ (${pct((7 - stealNeed(G)) / 6)})</button>` : ''}<button class="btn" id="gPH" ${bench.length && !busy ? '' : 'disabled'}>Pinch hit (${bench.length})</button><button class="btn" id="gBox">Box score</button></div>
-        ${ticker}`;
+        <div class="actrow"><button class="btn primary bigbtn" id="gRoll" ${dis}>${tac === 'bunt' ? 'Bunt' : 'Roll'}</button>
+          ${si ? `<button class="btn side" id="gSteal" ${dis}>Steal<small>${stealNeed(G)}+</small></button>` : ''}<button class="btn side" id="gPH" ${bench.length && !busy ? '' : 'disabled'}>Sub<small>${bench.length} left</small></button></div>`;
       P.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { if (busy) return; G.tactic = b.dataset.t; SFX.play('tap'); renderCards(); renderPanel(); save(); });
       $('#gRoll').onclick = humanBats;
       const st = $('#gSteal'); if (st) st.onclick = humanSteal;
       $('#gPH').onclick = pinchSheet;
     } else {
-      const fs = fieldSide(G), tac = G.botTac || 'swing';
-      const tl = { swing: 'Swinging away', power: 'Swinging for the fences', bunt: 'Showing bunt' }[tac];
-      P.innerHTML = `<p class="hintline">They're up. ${tl}. ${G.mom[G.human] ? `You have ◆${G.mom[G.human]} to cancel a big hit.` : 'No momentum left to cancel a hit.'}</p>
-        <button class="btn primary bigbtn" id="gPitch" ${dis}>Pitch</button>
-        <div class="subrow"><button class="btn" id="gPen" ${G.pen[fs].length && !busy ? '' : 'disabled'}>Bullpen (${G.pen[fs].length})</button><button class="btn" id="gIBB" ${dis}>Walk him</button><button class="btn" id="gBox">Box score</button></div>
-        ${ticker}`;
+      const fs = fieldSide(G);
+      P.innerHTML = `<div class="actrow"><button class="btn primary bigbtn" id="gPitch" ${dis}>Pitch</button>
+        <button class="btn side" id="gPen" ${G.pen[fs].length && !busy ? '' : 'disabled'}>Pen<small>${G.pen[fs].length} left</small></button><button class="btn side" id="gIBB" ${dis}>Walk<small>on purpose</small></button></div>`;
       $('#gPitch').onclick = humanPitches;
       $('#gPen').onclick = penSheet;
       $('#gIBB').onclick = humanIBB;
     }
-    $('#gBox').onclick = boxSheet;
-    $('#gTicker').onclick = logSheet;
   }
 
   /* ---------- board ---------- */
@@ -663,7 +802,7 @@
     if (end === 'over') { save(); busy = false; updateGame(); await sleep(700); showGameOver(); return; }
     await sleep(500); banner(G.half === 0 ? `${ordinal(G.inning)} inning` : 'Side retired', '', 1000); await sleep(900);
     lastRoll = null; prepTurn(); save(); busy = false; updateGame();
-    setExplain(humanBatting() ? 'Your turn to bat. Pick a swing and roll.' : 'You are pitching. Tap Pitch to face their batter.');
+    setExplain(humanBatting() ? 'You bat. Pick a swing and roll.' : 'You pitch. Tap Pitch.');
   }
   function prepTurn() {
     if (!G || G.over) return;
@@ -713,16 +852,14 @@
     openSheet(`<h3>Game menu</h3><div class="list">
       <button class="opt" data-a="box"><span><b>Box score</b><small>Line score and every player's game</small></span></button>
       <button class="opt" data-a="log"><span><b>Play-by-play</b><small>Everything that has happened</small></span></button>
-      <button class="opt" data-a="snd"><span><b>Sound: ${C.settings.sound ? 'on' : 'off'}</b><small>Dice, bat crack, crowd</small></span></button>
-      <button class="opt" data-a="spd"><span><b>Animation: ${C.settings.speed === 'fast' ? 'fast' : 'normal'}</b><small>Speed up rolls and runners</small></span></button>
+      <button class="opt" data-a="set"><span><b>Settings</b><small>Sound, colours, odds, names</small></span></button>
       <button class="opt" data-a="how"><span><b>How to play</b><small>Dice, cards, momentum, tactics</small></span></button>
       <button class="opt" data-a="exit"><span><b>Save and go to the clubhouse</b><small>The game resumes exactly here</small></span></button></div>
       <button class="btn primary block" data-a="close">Back to the game</button>`, s => {
       s.onclick = e => {
         const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
         if (a === 'close') closeSheet(); else if (a === 'box') boxSheet(); else if (a === 'log') logSheet(); else if (a === 'how') howTo();
-        else if (a === 'snd') { C.settings.sound = !C.settings.sound; save(); gameMenu(); }
-        else if (a === 'spd') { C.settings.speed = C.settings.speed === 'fast' ? 'normal' : 'fast'; save(); gameMenu(); }
+        else if (a === 'set') { if (busy) return; save(); closeSheet(); openSettings('game'); }
         else if (a === 'exit') { if (busy) return; save(); closeSheet(); hubTab = 'next'; go('hub'); }
       };
     });
@@ -780,7 +917,7 @@
   function go(s) {
     screen = s; closeSheet(); window.scrollTo(0, 0);
     if (s === 'game' && G && !G.over) { if (!humanBatting() && !G.botTac) G.botTac = botTactic(G); }
-    if (s === 'title') renderTitle(); else if (s === 'new') renderNew(); else if (s === 'hub') renderHub(); else if (s === 'game') { renderGameScreen(); setExplain(G && !G.over ? (humanBatting() ? 'Your turn to bat. Pick a swing and roll the dice.' : 'You are pitching. Tap Pitch to face their batter.') : ''); } else if (s === 'post') renderPost();
+    if (s === 'title') renderTitle(); else if (s === 'settings') renderSettings(); else if (s === 'new') renderNew(); else if (s === 'hub') renderHub(); else if (s === 'game') { renderGameScreen(); if (G && !G.over) setExplain(humanBatting() ? 'You bat. Pick a swing and roll.' : 'You pitch. Tap Pitch.'); } else if (s === 'post') renderPost();
   }
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = $('#tInstall'); if (b) b.hidden = false; });
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
