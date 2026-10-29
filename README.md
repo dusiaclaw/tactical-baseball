@@ -1,6 +1,6 @@
 # Tactical Baseball
 
-A tactical baseball board game for your phone, inspired by the Swiss baseball leagues. Manage a club through a season against a bot that learns your habits.
+A dice-and-cards baseball board game for your phone, inspired by the Swiss baseball leagues. Run a club through a season against a bot, one roll at a time.
 
 **Play:** https://dusiaclaw.github.io/tactical-baseball/
 
@@ -8,11 +8,11 @@ On Android, open the link in Chrome and tap **Install on this phone** on the tit
 
 ## How it plays
 
-- Every pitch, you and the bot choose at the same time.
-- **Batting:** tap the field to aim. Your aim is your guess: pull side = expecting inside, opposite field = outside, deep = high, short = low. Then swing Contact, Power, Take or Bunt.
-- **Pitching:** throw inside or outside, high or low, or waste one off the plate. Shift or drag your fielders, and go to the bullpen when your pitcher tires.
-- **Managing:** steals, sending runners on close plays, pinch hitters, intentional walks.
-- **Campaign:** a 7-week season against eight clubs, playoffs for the top four, player XP and training, free agents. Progress saves on the device after every pitch, with backup export and restore.
+- Every at-bat is one roll of three dice. The **card die** picks whose card is read (1–3 batter, 4–6 pitcher); the **two white dice** (2–12) point to a box on that card: single, double, home run, strikeout…
+- Both cards are always on screen. Wider boxes are more likely, so you can see the odds.
+- **Momentum ◆**: spend one to re-roll a single die, either to rescue your own out or to cancel the other team's big hit. The game shows the odds for each die before you choose. Earn ◆ with extra-base hits and strikeouts.
+- **Tactics**: Swing, Power (singles become fly outs, doubles become home runs), Bunt, Steal. On defense: bullpen and intentional walks. Pitcher cards wear down as they tire.
+- **Campaign**: a 7-week season against eight clubs, playoffs for the top four, player XP and training (better ratings mean better cards), free agents. A 3-inning game takes about 3–4 minutes. Progress saves on the device after every roll, with backup export and restore.
 
 ## Development
 
