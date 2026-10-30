@@ -438,3 +438,15 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
 .pst .chip{font-style:normal; font-weight:800; font-size:11px; padding:1px 4px; border-radius:5px; line-height:1.25}
 .pst .chip em{font-size:8px; margin:0 2px 0 0; opacity:.75}
 .pst b{margin-right:2px}
+
+.pst .stbox{background:#e6dfc9; color:#1f2620; border-radius:6px; padding:2px 6px; font-weight:800; font-size:11px; white-space:nowrap}
+.pst .ovrbox{border-radius:6px; padding:2px 6px; font-size:12px; font-weight:800; margin:0; color:#1f2620; background:#e8a317}
+.pst .ovrbox.hi{background:#3aa76d; color:#04200f} .pst .ovrbox.lo{background:#d64b3c; color:#fff}
+.pst{gap:4px}
+.strip.bunt .cell{height:42px; grid-template-rows:1fr} .strip.bunt .cell b{font-size:13px; font-stretch:90%}
+.pcard.power{background:linear-gradient(135deg,#2a0a0a 0%,#a1201a 55%,#ff8a1f 100%); color:#fff; box-shadow:0 0 0 2px #ff8a1f, 0 0 18px #ff5a1f99, 0 6px 14px #0006; animation:pwpulse 1.2s ease-in-out infinite}
+.pcard.power .nm{color:#fff}
+.pcard.power .stbox{background:#fff3; color:#fff}
+@keyframes pwpulse{50%{box-shadow:0 0 0 2px #ffc14d, 0 0 26px #ff5a1fcc, 0 6px 14px #0006}}
+
+.strip.bunt .cell b{text-align:center; line-height:1.1; font-size:12px}

@@ -760,16 +760,23 @@
     const lr = lastRoll && lastRoll.seq === G.seq ? lastRoll : null;
     const f = cards.f;
     const batCls = lr ? (lr.src === 'bat' ? 'live' : 'dim') : '', pitCls = lr ? (lr.src === 'pit' ? 'live' : 'dim') : '';
-    const chip = tac !== 'swing' ? `<span class="tchip">${tac === 'power' ? 'POWER' : 'BUNT'}</span>` : '';
+    const chip = '', pw = tac === 'power' ? ' power' : '';
     $('#cards').innerHTML = `
-      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${pst(bat, cards.bat)}${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
-        ${stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
-      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${pst(pit, cards.pit)}${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
-        ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
+      <div class="pcard ${batCls}${pw}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${pst(bat, cards.bat, tac)}${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
+        ${tac === 'bunt' ? buntStrip() : stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
+      <div class="pcard ${pitCls}${pw}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${tac === 'bunt' ? '' : pst(pit, cards.pit, tac)}${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
+        ${tac === 'bunt' ? buntStrip() : stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
   }
-  function pst(p, card) {
-    const sm = cardSummary(card), n = x => Math.round(x * 100), ch = (k, l, v) => `<i class="chip ${k}"><em>${l}</em>${n(v)}</i>`;
-    return `<span class="pst"><b>${ovr(p).toFixed(1)}</b>${p.kind === 'P' ? ch('k-out', 'Out', 1 - sm.ob) + ch('k-k', 'K', sm.k) : ch('k-hit', 'OB', sm.ob) + ch('k-hr', 'HR', sm.hr) + ch('k-k', 'K', sm.k)}</span>`;
+  function pst(p, card, tac) {
+    const sm = cardSummary(card), n = x => Math.round(x * 100), o = ovr(p), tier = o >= 7 ? 'hi' : o >= 5 ? 'mid' : 'lo';
+    let txt;
+    if (tac === 'bunt') { const h = tacticOdds(G, 'bunt').ob; txt = `Safe:${n(h)}, Out:${n(1 - h)}`; }
+    else txt = p.kind === 'P' ? `Out:${n(1 - sm.ob)}, K:${n(sm.k)}` : `OB:${n(sm.ob)}, HR:${n(sm.hr)}, K:${n(sm.k)}`;
+    return `<span class="pst"><b class="ovrbox ${tier}">${o.toFixed(1)}</b><span class="stbox">${txt}</span></span>`;
+  }
+  function buntStrip() {
+    const h = tacticOdds(G, 'bunt').ob;
+    return `<div class="strip bunt"><div class="cell k-hit" style="--w:${Math.round(h * 100)}"><b>SAFE<br>${pct(h)}</b></div><div class="cell k-out" style="--w:${Math.round((1 - h) * 100)}"><b>OUT<br>${pct(1 - h)}</b></div></div>`;
   }
   function meta(p) { const o = ovr(p); return `<span class="pmeta"><span>Lv${levelOf(p)}</span><span class="pm"><i style="width:${Math.min(100, o * 10)}%"></i></span><b>${o.toFixed(1)}</b></span>`; }
   function armMeter(p, side, f) {
