@@ -433,6 +433,9 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
 @media (prefers-reduced-motion: reduce){ #matchup *{animation-duration:.01ms !important; animation-delay:0s !important} }
 #coach.wait{opacity:.5}
 
+.clog ul{margin:4px 0 8px; padding-left:18px; font-size:13.5px; line-height:1.45}
+.clog li{margin:2px 0}
+
 </style>
 </head>
 <body>
@@ -445,7 +448,11 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
    TACTICAL BASEBALL — dice engine (pure logic, no DOM)
    Every at-bat: card die (1–3 batter card, 4–6 pitcher card) + two white dice (2–12).
    ===================================================================== */
-const VERSION = '2.0';
+const VERSION = '2.1';
+const CHANGELOG = [
+  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings']],
+  ['2.0', 'Oct 29, 2026', ['Dice and board game with the Swiss club campaign', 'Gear, levels and learnable moves', 'Drag-and-drop batting order and optimizer', 'Season stats, home parks, real names import, settings page']]
+];
 const SAVE_KEY = 'tactical-baseball-v2';
 
 /* ---------- utilities ---------- */
@@ -1619,6 +1626,8 @@ function signFA(faId, releaseId) {
         <p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">${names ? `Real names saved on this phone: ${names.count} players from ${Object.keys(names.teams).length} clubs (${new Date(names.at).toLocaleDateString()}).` : 'Using fictional names.'}</p>
         <div class="setrow"><span>Names in game</span>${seg('sNames', realNamesOn() ? 'real' : 'fictional', [['fictional', 'Fictional'], ['real', 'Real']])}</div>
         <button class="btn" id="sLoad">${names ? 'Update real names' : 'Load real names'}</button></section>
+      <section class="card setlist"><div class="eyebrow">Changelog</div>
+        ${CHANGELOG.map(c => `<div class="clog"><b>v${c[0]}</b> <span class="muted">${c[1]}</span><ul>${c[2].map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}</section>
       ${C ? `<section class="card setlist"><div class="eyebrow">Backup</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cExport" style="flex:1">Export backup</button><button class="btn" id="cImport" style="flex:1">Restore backup</button><input type="file" id="cFile" accept="application/json,.json" hidden></div>
         <button class="btn danger" id="cReset">Start a new campaign</button></section>` : ''}

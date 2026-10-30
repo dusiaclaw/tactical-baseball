@@ -493,6 +493,8 @@
         <p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">${names ? `Real names saved on this phone: ${names.count} players from ${Object.keys(names.teams).length} clubs (${new Date(names.at).toLocaleDateString()}).` : 'Using fictional names.'}</p>
         <div class="setrow"><span>Names in game</span>${seg('sNames', realNamesOn() ? 'real' : 'fictional', [['fictional', 'Fictional'], ['real', 'Real']])}</div>
         <button class="btn" id="sLoad">${names ? 'Update real names' : 'Load real names'}</button></section>
+      <section class="card setlist"><div class="eyebrow">Changelog</div>
+        ${CHANGELOG.map(c => `<div class="clog"><b>v${c[0]}</b> <span class="muted">${c[1]}</span><ul>${c[2].map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}</section>
       ${C ? `<section class="card setlist"><div class="eyebrow">Backup</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cExport" style="flex:1">Export backup</button><button class="btn" id="cImport" style="flex:1">Restore backup</button><input type="file" id="cFile" accept="application/json,.json" hidden></div>
         <button class="btn danger" id="cReset">Start a new campaign</button></section>` : ''}

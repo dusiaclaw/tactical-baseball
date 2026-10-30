@@ -417,3 +417,6 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
 .mu-tap{text-align:center; color:var(--muted); font-size:13px; opacity:0; animation:ifade .4s 1.8s forwards}
 @media (prefers-reduced-motion: reduce){ #matchup *{animation-duration:.01ms !important; animation-delay:0s !important} }
 #coach.wait{opacity:.5}
+
+.clog ul{margin:4px 0 8px; padding-left:18px; font-size:13.5px; line-height:1.45}
+.clog li{margin:2px 0}
