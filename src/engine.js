@@ -5,7 +5,7 @@
    ===================================================================== */
 const VERSION = '2.1';
 const CHANGELOG = [
-  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings']],
+  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings', 'Game cards show rating, on-base, home-run and strikeout odds for the current batter and pitcher']],
   ['2.0', 'Oct 29, 2026', ['Dice and board game with the Swiss club campaign', 'Gear, levels and learnable moves', 'Drag-and-drop batting order and optimizer', 'Season stats, home parks, real names import, settings page']]
 ];
 const SAVE_KEY = 'tactical-baseball-v2';

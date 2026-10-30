@@ -762,11 +762,12 @@
     const batCls = lr ? (lr.src === 'bat' ? 'live' : 'dim') : '', pitCls = lr ? (lr.src === 'pit' ? 'live' : 'dim') : '';
     const chip = tac !== 'swing' ? `<span class="tchip">${tac === 'power' ? 'POWER' : 'BUNT'}</span>` : '';
     $('#cards').innerHTML = `
-      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
+      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${pst(bat, cards.bat)}${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
         ${stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
-      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
+      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${pst(pit, cards.pit)}${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
         ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
   }
+  function pst(p, card) { const sm = cardSummary(card); return `<span class="pst"><b>${ovr(p).toFixed(1)}</b><em>OB</em>${Math.round(sm.ob * 100)} <em>HR</em>${Math.round(sm.hr * 100)} <em>K</em>${Math.round(sm.k * 100)}</span>`; }
   function meta(p) { const o = ovr(p); return `<span class="pmeta"><span>Lv${levelOf(p)}</span><span class="pm"><i style="width:${Math.min(100, o * 10)}%"></i></span><b>${o.toFixed(1)}</b></span>`; }
   function armMeter(p, side, f) {
     const cap = pitchCap(p), left = clamp(1 - G.bf[side] / (cap + 6), 0, 1), col = f > 0 ? '#e5533d' : G.bf[side] >= cap - 2 ? '#f5b83d' : '#5fd08d';

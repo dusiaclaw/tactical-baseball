@@ -436,6 +436,19 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
 .clog ul{margin:4px 0 8px; padding-left:18px; font-size:13.5px; line-height:1.45}
 .clog li{margin:2px 0}
 
+.pcard .nm{flex:0 1 auto}
+.pst{flex:1 1 0; min-width:0; font-size:11px; font-weight:700; color:#4b5a4f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
+.pst b{color:#1f2620; font-weight:800; margin-right:3px}
+
+.pst{font-size:11px; word-spacing:-1px}
+.pst em{font-style:normal; font-size:8.5px; font-weight:800; opacity:.65; margin:0 1px 0 0}
+.pcard .hd{gap:5px}
+.pcard .arm .pm{width:24px}
+.pst{flex:none; margin-left:auto; text-align:right}
+.pst b{margin-right:4px}
+.pst em{margin-left:3px}
+.pcard .nm{flex:1 1 0; min-width:0}
+
 </style>
 </head>
 <body>
@@ -450,7 +463,7 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
    ===================================================================== */
 const VERSION = '2.1';
 const CHANGELOG = [
-  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings']],
+  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings', 'Game cards show rating, on-base, home-run and strikeout odds for the current batter and pitcher']],
   ['2.0', 'Oct 29, 2026', ['Dice and board game with the Swiss club campaign', 'Gear, levels and learnable moves', 'Drag-and-drop batting order and optimizer', 'Season stats, home parks, real names import, settings page']]
 ];
 const SAVE_KEY = 'tactical-baseball-v2';
@@ -1895,11 +1908,12 @@ function signFA(faId, releaseId) {
     const batCls = lr ? (lr.src === 'bat' ? 'live' : 'dim') : '', pitCls = lr ? (lr.src === 'pit' ? 'live' : 'dim') : '';
     const chip = tac !== 'swing' ? `<span class="tchip">${tac === 'power' ? 'POWER' : 'BUNT'}</span>` : '';
     $('#cards').innerHTML = `
-      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
+      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${pst(bat, cards.bat)}${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
         ${stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
-      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
+      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${pst(pit, cards.pit)}${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
         ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
   }
+  function pst(p, card) { const sm = cardSummary(card); return `<span class="pst"><b>${ovr(p).toFixed(1)}</b><em>OB</em>${Math.round(sm.ob * 100)} <em>HR</em>${Math.round(sm.hr * 100)} <em>K</em>${Math.round(sm.k * 100)}</span>`; }
   function meta(p) { const o = ovr(p); return `<span class="pmeta"><span>Lv${levelOf(p)}</span><span class="pm"><i style="width:${Math.min(100, o * 10)}%"></i></span><b>${o.toFixed(1)}</b></span>`; }
   function armMeter(p, side, f) {
     const cap = pitchCap(p), left = clamp(1 - G.bf[side] / (cap + 6), 0, 1), col = f > 0 ? '#e5533d' : G.bf[side] >= cap - 2 ? '#f5b83d' : '#5fd08d';
