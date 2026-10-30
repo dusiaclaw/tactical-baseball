@@ -1,9 +1,9 @@
 {
-  "id": "/tactical-baseball/",
+  "id": "/tactical-baseball/?app=2",
   "name": "Tactical Baseball",
   "short_name": "Tactical BB",
   "description": "Dice-and-cards baseball with a Swiss league campaign",
-  "start_url": "./",
+  "start_url": "./?app=2",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

@@ -1,4 +1,4 @@
-const CACHE = 'tb-v2.1';
+const CACHE = 'tb-v2.1b';
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest']).catch(() => {}))); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
