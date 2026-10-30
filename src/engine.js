@@ -221,17 +221,23 @@ function nextGame() {
   }
   if (C.phase === 'playoffs' && C.po) {
     if (C.po.stage === 'semi') { const g = C.po.semis.find(x => (x.home === C.club || x.away === C.club) && !x.res); if (g) return { home: g.home, away: g.away, label: 'Semifinal', ref: g }; }
-    if (C.po.stage === 'final' && C.po.final && !C.po.final.res) return { home: C.po.final.home, away: C.po.final.away, label: 'Swiss Final', ref: C.po.final };
+    if (C.po.stage === 'final' && C.po.final && !C.po.final.res) { const ref = finalGameRef(C.po.final); return { home: ref.home, away: ref.away, label: `Swiss Final · Game ${ref.n}`, ref }; }
   }
   return null;
 }
 function winnerOf(g) { return g.res.h > g.res.a ? g.home : g.away; }
+// best-of-3 Swiss Final: games 1 and 3 at the higher seed, game 2 at the lower seed
+function newFinal(hi, lo) { return { home: hi, away: lo, games: [], res: null }; }
+function finalGameRef(f) { f.games = f.games || []; const n = f.games.length + 1; return n === 2 ? { home: f.away, away: f.home, res: null, n } : { home: f.home, away: f.away, res: null, n }; }
+function seriesWins(f) { const w = { [f.home]: 0, [f.away]: 0 }; for (const g of f.games || []) w[winnerOf(g)]++; return w; }
+function recordFinalGame(f, g) { f.games.push(g); const w = seriesWins(f); if (w[f.home] >= 2 || w[f.away] >= 2) f.res = { h: w[f.home], a: w[f.away] }; }
+function simFinal(f) { let k = 0; while (!f.res && k++ < 5) { const g = finalGameRef(f); simGame(g); recordFinalGame(f, g); } }
 function simGame(ref) {
   const g = newGameState(ref.home, ref.away, null, C.innings, '');
   let guard = 0;
   while (!g.over && guard++ < 600) autoPA(g);
   ref.res = { a: runsOf(g, 'away'), h: runsOf(g, 'home') };
-  applyBoxToStats(g);
+  applyBoxToStats(g); injuries(g);
   for (const id of [ref.home, ref.away]) C.teams[id].nextSP++;
 }
 function aiGrowth(n) {
@@ -248,13 +254,22 @@ function setupPlayoffs() {
   if (!top.includes(C.club)) {
     for (const g of C.po.semis) simGame(g);
     const w = C.po.semis.map(winnerOf); w.sort((a, b) => top.indexOf(a) - top.indexOf(b));
-    C.po.final = { home: w[0], away: w[1], res: null }; simGame(C.po.final);
+    C.po.final = newFinal(w[0], w[1]); simFinal(C.po.final);
     C.po.stage = 'done'; C.po.champ = winnerOf(C.po.final); C.phase = 'over'; C.outcome = 'missed'; archiveSeason();
   }
 }
+function seasonAwards() {
+  let mvp = null, cy = null, mv = -1, cv = -1e9;
+  for (const id in C.teams) for (const p of C.teams[id].players) {
+    const s = p.s;
+    if (p.kind === 'H' && s.pa >= 6) { const v = s.h + s.d + 2 * s.t + 3 * s.hr + s.bb + .5 * (s.rbi + s.r + s.sb); if (v > mv) { mv = v; mvp = { id: p.id, team: id, name: `${p.first} ${p.last}`, line: `${s.h}-for-${s.ab}, ${s.hr} HR, ${s.rbi} RBI` }; } }
+    if (p.kind === 'P' && s.po >= 6) { const v = s.po / 3 + .5 * s.pk - 1.5 * s.ra; if (v > cv) { cv = v; cy = { id: p.id, team: id, name: `${p.first} ${p.last}`, line: `${s.po / 3 | 0}.${s.po % 3} IP, ${s.ra} R, ${s.pk} K` }; } }
+  }
+  return { mvp, pitcher: cy };
+}
 function archiveSeason() {
   const st = standings(), me = st.find(r => r.id === C.club);
-  C.hist.push({ season: C.season, w: me.w, l: me.l, place: st.indexOf(me) + 1, outcome: C.outcome, champ: C.po ? C.po.champ : null });
+  C.hist.push({ season: C.season, w: me.w, l: me.l, place: st.indexOf(me) + 1, outcome: C.outcome, champ: C.po ? C.po.champ : null, awards: seasonAwards() });
 }
 function advanceCalendar(gameRef, res) {
   gameRef.res = res;
@@ -267,13 +282,17 @@ function advanceCalendar(gameRef, res) {
     if (C.po.stage === 'semi') {
       for (const g of C.po.semis) if (!g.res) simGame(g);
       const w = C.po.semis.map(winnerOf), s = C.po.seeds; w.sort((a, b) => s.indexOf(a) - s.indexOf(b));
-      C.po.final = { home: w[0], away: w[1], res: null };
-      if (!clubWon) { simGame(C.po.final); C.po.stage = 'done'; C.po.champ = winnerOf(C.po.final); C.phase = 'over'; C.outcome = 'semi'; archiveSeason(); }
+      C.po.final = newFinal(w[0], w[1]);
+      if (!clubWon) { simFinal(C.po.final); C.po.stage = 'done'; C.po.champ = winnerOf(C.po.final); C.phase = 'over'; C.outcome = 'semi'; archiveSeason(); }
       else { C.po.stage = 'final'; genFA(); }
     } else if (C.po.stage === 'final') {
-      C.po.stage = 'done'; C.po.champ = winnerOf(gameRef); C.phase = 'over';
-      C.outcome = clubWon ? 'champion' : 'runnerup'; if (clubWon) C.titles++;
-      archiveSeason();
+      const f = C.po.final; recordFinalGame(f, gameRef);
+      if (f.res) {
+        const champWon = winnerOf(f) === C.club;
+        C.po.stage = 'done'; C.po.champ = winnerOf(f); C.phase = 'over';
+        C.outcome = champWon ? 'champion' : 'runnerup'; if (champWon) C.titles++;
+        archiveSeason();
+      }
     }
   }
 }
@@ -287,12 +306,17 @@ function startNextSeason() {
 
 /* ---------- game state ---------- */
 function newGameState(home, away, human, innings, label) {
-  const side = id => { const t = C.teams[id]; const sp = t.rotation[t.nextSP % t.rotation.length]; return { lineup: t.lineup.map(s => ({ ...s })), bench: [...t.bench], sp, pen: [...t.pen] }; };
+  const side = id => {
+    const t = C.teams[id], sp = t.rotation[t.nextSP % t.rotation.length];
+    const lineup = t.lineup.map(s => ({ ...s })), bench = t.bench.filter(b => !(getP(b).inj > 0)), subs = [];
+    for (const sl of lineup) if (getP(sl.id).inj > 0 && bench.length) { const b = bench.shift(); subs.push({ out: sl.id, in: b }); sl.id = b; }
+    return { lineup, bench, sp, pen: [...t.pen], subs };
+  };
   const A = side(away), H = side(home);
   return { home, away, human, label, innings, inning: 1, half: 0, outs: 0, bases: [null, null, null],
     line: { away: [0], home: [] }, H: { away: 0, home: 0 }, bi: { away: 0, home: 0 },
     gl: { away: A.lineup, home: H.lineup }, bench: { away: A.bench, home: H.bench }, pit: { away: A.sp, home: H.sp },
-    bf: { away: 0, home: 0 }, pen: { away: A.pen, home: H.pen }, usedP: { away: [A.sp], home: [H.sp] },
+    bf: { away: 0, home: 0 }, pen: { away: A.pen, home: H.pen }, usedP: { away: [A.sp], home: [H.sp] }, injSubs: { away: A.subs, home: H.subs },
     mom: { away: 2, home: 2 }, box: {}, log: [], over: false, walkoff: false, seq: 0, tactic: 'swing' };
 }
 const batSide = g => g.half === 0 ? 'away' : 'home';
@@ -499,7 +523,9 @@ function buntEV(g) {
   const sac = runs + reOf(o >= 3 ? [null, null, null] : nb, o);
   return pH * (hit.runs + reOf(hit.bases, hit.outs)) + (1 - pH) * sac - reOf(g.bases, g.outs);
 }
+let TUT = null;
 function botWantsSteal(g) {
+  if (TUT) return false;
   const si = stealInfo(g); if (!si || g.outs >= 2) return false;
   const p = (7 - stealNeed(g)) / 6;
   const nb = g.bases.slice(); nb[si.from - 1] = null; nb[si.from] = 1;
@@ -509,6 +535,7 @@ function botWantsSteal(g) {
 }
 // offense: maximise; defense: minimise. returns die index or -1
 function botReroll(g, dice, tactic, role) {
+  if (TUT) return -1;
   const cfg = botCfg(), side = role === 'off' ? batSide(g) : fieldSide(g);
   if (g.mom[side] <= 0) return -1;
   if (cfg.skip && rand() < cfg.skip) return -1;
@@ -558,6 +585,30 @@ function describe(g0, res, ctx) {
 }
 
 /* ---------- finishing a game ---------- */
+function injuries(g) {
+  const hurt = [];
+  for (const side of ['away', 'home']) {
+    const t = C.teams[g[side]];
+    for (const p of t.players) if (p.inj > 0) p.inj--;
+    for (const sl of g.gl[side]) { const p = getP(sl.id), b = g.box[sl.id]; if (p && b && b.pa && rand() < .035) { p.inj = rand() < .35 ? 2 : 1; hurt.push({ id: p.id, team: g[side], games: p.inj }); } }
+  }
+  return hurt;
+}
+function playerOfGame(g) {
+  const win = runsOf(g, 'home') > runsOf(g, 'away') ? 'home' : 'away';
+  let best = null, bv = -1e9;
+  for (const side of ['away', 'home']) {
+    const ids = new Set([...g.gl[side].map(s => s.id), ...g.usedP[side], ...Object.keys(g.box).filter(id => C.teams[g[side]].players.some(p => p.id === id))]);
+    for (const id of ids) {
+      const b = g.box[id]; if (!b) continue;
+      let v = b.pa ? b.h * 2 + b.d + 2 * b.t + 3 * b.hr + b.rbi + b.r + b.bb + b.sb : 0;
+      if (b.bf) v = Math.max(v, b.po * .6 + b.pk * .8 - b.ra * 1.5);
+      if (side === win) v += 2;
+      if (v > bv) { bv = v; best = { id, team: g[side], box: b }; }
+    }
+  }
+  return best;
+}
 function applyBoxToStats(g) {
   for (const id in g.box) {
     const p = getP(id); if (!p) continue; const b = g.box[id];
@@ -570,6 +621,7 @@ function finishGame() {
   const my = runsOf(g, side), them = runsOf(g, oppSide), won = my > them;
   const ng = nextGame();
   applyBoxToStats(g);
+  const pog = playerOfGame(g), hurt = injuries(g).filter(h => h.team === C.club);
   const xp = {}, lv = [];
   for (const p of C.teams[C.club].players) {
     const b = g.box[p.id];
@@ -589,7 +641,7 @@ function finishGame() {
   C.credits += cr; if (won) C.allW++; else C.allL++;
   C.teams[g.home].nextSP++; C.teams[g.away].nextSP++;
   const summary = { won, my, them, opp, home: g.home, away: g.away, label: g.label, line: JSON.parse(JSON.stringify(g.line)), H: { ...g.H }, innings: g.innings,
-    box: Object.fromEntries(Object.entries(g.box).filter(([id]) => C.teams[C.club].players.some(p => p.id === id))), xp, lv, cr, walkoff: g.walkoff, final: g.label === 'Swiss Final' };
+    box: Object.fromEntries(Object.entries(g.box).filter(([id]) => C.teams[C.club].players.some(p => p.id === id))), xp, lv, cr, walkoff: g.walkoff, final: /^Swiss Final/.test(g.label), pog, hurt };
   const res = g.home === C.club ? { h: my, a: them } : { h: them, a: my };
   C.game = null; G = null;
   if (ng) advanceCalendar(ng.ref, res);
@@ -602,6 +654,7 @@ function startGame() {
   const ng = nextGame(); if (!ng) return null;
   G = newGameState(ng.home, ng.away, ng.home === C.club ? 'home' : 'away', C.innings, ng.label);
   logPlay(G, `${teamInfo(G.away).name} at ${teamInfo(G.home).name}. ${G.label}.`, 'sys');
+  for (const side of ['away', 'home']) for (const sb of G.injSubs[side] || []) logPlay(G, `${getP(sb.out).last} is injured. ${getP(sb.in).last} starts in his place.`, 'sys');
   C.game = G; return G;
 }
 function buyGear(key) { const g = GEAR[key]; if (!g || C.credits < g.cost) return false; C.credits -= g.cost; (C.inv = C.inv || []).push(key); return true; }

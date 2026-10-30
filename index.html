@@ -373,6 +373,66 @@ table.stats td:first-child{max-width:130px; overflow:hidden; text-overflow:ellip
 @keyframes iby{0%{opacity:1; transform:translateY(0) scale(1)}50%{transform:translateY(-60px) scale(1.6)}100%{opacity:1; transform:translateY(0) scale(.8)}}
 @keyframes iup{to{opacity:1; transform:none}}
 
+/* ---------- v2.3: playoffs, back button, gem fly, meta, fatigue, awards, injuries, tutorial, matchup ---------- */
+.bm.final{border-color:#9c7a26}
+.gpills{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px}
+.gpill{font-size:11.5px; font-weight:700; padding:2px 7px; border-radius:999px; background:#22362b; color:var(--muted); font-variant-numeric:tabular-nums}
+.gpill.w{background:#1f4a2f; color:var(--hit)} .gpill.l{background:#4a2420; color:#ffb2a8}
+.shhead{position:sticky; top:-18px; z-index:3; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin:-18px -16px 0; padding:18px 16px 10px; background:linear-gradient(#1a2e23 85%, #1a2e2300)}
+.iconbtn.back{flex:none; border-color:var(--line2); background:var(--panel2)}
+.injtag{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; background:#c0392b; color:#fff; border-radius:4px; padding:1px 5px; margin-left:5px; vertical-align:2px}
+.gem.glow{animation:gemglow .7s ease-in-out 5; z-index:1}
+@keyframes gemglow{0%,100%{box-shadow:0 0 6px #6cc4ff99} 50%{box-shadow:0 0 0 3px #fff, 0 0 18px 6px #6cc4ff; transform:rotate(45deg) scale(1.35)}}
+.flygem{position:fixed; left:0; top:0; width:16px; height:16px; z-index:90; pointer-events:none; border-radius:3px; background:linear-gradient(135deg,#bfe8ff,#2f86d1); border:1px solid #1f5f99; box-shadow:0 0 14px 4px #6cc4ffaa}
+.pmeta{display:flex; align-items:center; gap:4px; font-size:10.5px; font-weight:800; color:#4b5a4f; flex:none}
+.pmeta b{color:#1f2620; font-size:11px; font-variant-numeric:tabular-nums}
+.pm{display:inline-block; width:28px; height:6px; border-radius:3px; background:#d8cfb7; overflow:hidden}
+.pm i{display:block; height:100%; background:#2f86d1; border-radius:3px}
+.arm{display:flex; align-items:center; gap:2px; color:#4b5a4f; flex:none}
+.arm.tired{color:#c0392b} .arm .pm{width:30px}
+.awards{display:grid; gap:6px}
+.award, .pog{display:flex; gap:10px; align-items:center}
+.award span, .pog span{display:grid; min-width:0}
+.award small, .pog small{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--amber)}
+.award b, .pog b{font-size:16px} .award i, .pog i{font-style:normal; font-size:12.5px; color:var(--muted)}
+.pog{border-color:#9c7a26; background:linear-gradient(90deg,#2b2410,var(--panel))}
+.lvbox{display:grid; gap:8px; background:var(--bg2); border:1px solid var(--line); border-radius:12px; padding:10px}
+.lvh{display:flex; align-items:center; gap:8px}
+.title .menu .row2 .btn{padding:12px 6px; font-size:15px}
+/* tutorial */
+body.tut .note{display:none}
+#coach{position:fixed; z-index:95; left:max(10px, env(safe-area-inset-left,0px)); right:max(10px, env(safe-area-inset-right,0px)); top:calc(env(safe-area-inset-top,0px) + 6px); max-width:560px; margin:0 auto; background:#0b1410f2; border:1px solid var(--amber); border-radius:14px; padding:10px 12px; box-shadow:0 10px 30px #000c; animation:up .25s ease-out}
+#coach p{margin:4px 0 8px; font-size:14.5px; line-height:1.4}
+#coach .coach-step{font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--amber)}
+#coach .coach-btns{display:flex; justify-content:space-between; gap:8px}
+#coach .coach-btns .btn{flex:0 1 auto}
+@keyframes tutpulse{0%,100%{box-shadow:0 0 0 2px var(--amber)} 50%{box-shadow:0 0 0 6px var(--amber), 0 0 24px var(--amber)}}
+body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="power"] .tac[data-t="power"], body[data-tut="cards"] #cards .pcard, body[data-tut="tray"] #tray .die{animation:tutpulse 1.1s ease-in-out infinite}
+/* pre-game matchup */
+#matchup{position:fixed; inset:0; z-index:96; background:radial-gradient(120% 80% at 50% 30%, #1b3526, #070d0a); display:grid; align-content:center; gap:14px; padding:calc(env(safe-area-inset-top,0px) + 16px) max(12px, env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(12px, env(safe-area-inset-left,0px)); cursor:pointer; transition:opacity .4s}
+#matchup.out{opacity:0}
+.mu-top{text-align:center; font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); animation:ifade .4s forwards; opacity:0}
+.mu-grid{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:8px; align-items:start; max-width:560px; width:100%; margin:0 auto}
+.mu-side{display:grid; justify-items:center; gap:4px; text-align:center; min-width:0; background:linear-gradient(180deg, color-mix(in srgb, var(--c1) 45%, transparent), transparent 70%); border-radius:16px; padding:12px 6px}
+.mu-side.away{animation:muL .55s cubic-bezier(.2,1.2,.4,1) both} .mu-side.home{animation:muR .55s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes muL{from{transform:translateX(-110%); opacity:0}} @keyframes muR{from{transform:translateX(110%); opacity:0}}
+.mu-badge .bdg{filter:drop-shadow(0 6px 10px #000a)}
+.mu-name{font-family:var(--f-display); font-weight:400; font-size:clamp(17px,5vw,24px); line-height:1.05}
+.mu-side small{color:var(--muted); font-size:12px}
+.mu-pow{display:flex; align-items:center; gap:6px; margin:4px 0}
+.mu-pow .seg{display:flex; gap:2px} .mu-pow .seg i{width:7px; height:14px; border-radius:2px; background:#ffffff1f}
+.mu-pow .seg i.on{background:var(--amber); animation:ipop .25s both; transform:scale(0)}
+.mu-pow b{font-variant-numeric:tabular-nums; font-size:15px}
+.mu-list{list-style:none; margin:4px 0 0; padding:0; display:grid; gap:2px; width:100%}
+.mu-list li{display:flex; gap:6px; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0; animation:ifade .3s forwards; text-align:left}
+.mu-list li span{flex:none; width:24px; font-size:10px; font-weight:800; color:var(--muted); padding-top:2px}
+.mu-list li.sp{margin-top:4px; color:var(--amber)}
+.mu-vs{align-self:center; font-family:var(--f-display); font-size:30px; color:var(--amber); text-shadow:0 0 18px #f5b83d88; animation:vspop .5s .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes vspop{from{transform:scale(0); opacity:0}}
+.mu-tap{text-align:center; color:var(--muted); font-size:13px; opacity:0; animation:ifade .4s 1.8s forwards}
+@media (prefers-reduced-motion: reduce){ #matchup *{animation-duration:.01ms !important; animation-delay:0s !important} }
+#coach.wait{opacity:.5}
+
 </style>
 </head>
 <body>
@@ -603,17 +663,23 @@ function nextGame() {
   }
   if (C.phase === 'playoffs' && C.po) {
     if (C.po.stage === 'semi') { const g = C.po.semis.find(x => (x.home === C.club || x.away === C.club) && !x.res); if (g) return { home: g.home, away: g.away, label: 'Semifinal', ref: g }; }
-    if (C.po.stage === 'final' && C.po.final && !C.po.final.res) return { home: C.po.final.home, away: C.po.final.away, label: 'Swiss Final', ref: C.po.final };
+    if (C.po.stage === 'final' && C.po.final && !C.po.final.res) { const ref = finalGameRef(C.po.final); return { home: ref.home, away: ref.away, label: `Swiss Final · Game ${ref.n}`, ref }; }
   }
   return null;
 }
 function winnerOf(g) { return g.res.h > g.res.a ? g.home : g.away; }
+// best-of-3 Swiss Final: games 1 and 3 at the higher seed, game 2 at the lower seed
+function newFinal(hi, lo) { return { home: hi, away: lo, games: [], res: null }; }
+function finalGameRef(f) { f.games = f.games || []; const n = f.games.length + 1; return n === 2 ? { home: f.away, away: f.home, res: null, n } : { home: f.home, away: f.away, res: null, n }; }
+function seriesWins(f) { const w = { [f.home]: 0, [f.away]: 0 }; for (const g of f.games || []) w[winnerOf(g)]++; return w; }
+function recordFinalGame(f, g) { f.games.push(g); const w = seriesWins(f); if (w[f.home] >= 2 || w[f.away] >= 2) f.res = { h: w[f.home], a: w[f.away] }; }
+function simFinal(f) { let k = 0; while (!f.res && k++ < 5) { const g = finalGameRef(f); simGame(g); recordFinalGame(f, g); } }
 function simGame(ref) {
   const g = newGameState(ref.home, ref.away, null, C.innings, '');
   let guard = 0;
   while (!g.over && guard++ < 600) autoPA(g);
   ref.res = { a: runsOf(g, 'away'), h: runsOf(g, 'home') };
-  applyBoxToStats(g);
+  applyBoxToStats(g); injuries(g);
   for (const id of [ref.home, ref.away]) C.teams[id].nextSP++;
 }
 function aiGrowth(n) {
@@ -630,13 +696,22 @@ function setupPlayoffs() {
   if (!top.includes(C.club)) {
     for (const g of C.po.semis) simGame(g);
     const w = C.po.semis.map(winnerOf); w.sort((a, b) => top.indexOf(a) - top.indexOf(b));
-    C.po.final = { home: w[0], away: w[1], res: null }; simGame(C.po.final);
+    C.po.final = newFinal(w[0], w[1]); simFinal(C.po.final);
     C.po.stage = 'done'; C.po.champ = winnerOf(C.po.final); C.phase = 'over'; C.outcome = 'missed'; archiveSeason();
   }
 }
+function seasonAwards() {
+  let mvp = null, cy = null, mv = -1, cv = -1e9;
+  for (const id in C.teams) for (const p of C.teams[id].players) {
+    const s = p.s;
+    if (p.kind === 'H' && s.pa >= 6) { const v = s.h + s.d + 2 * s.t + 3 * s.hr + s.bb + .5 * (s.rbi + s.r + s.sb); if (v > mv) { mv = v; mvp = { id: p.id, team: id, name: `${p.first} ${p.last}`, line: `${s.h}-for-${s.ab}, ${s.hr} HR, ${s.rbi} RBI` }; } }
+    if (p.kind === 'P' && s.po >= 6) { const v = s.po / 3 + .5 * s.pk - 1.5 * s.ra; if (v > cv) { cv = v; cy = { id: p.id, team: id, name: `${p.first} ${p.last}`, line: `${s.po / 3 | 0}.${s.po % 3} IP, ${s.ra} R, ${s.pk} K` }; } }
+  }
+  return { mvp, pitcher: cy };
+}
 function archiveSeason() {
   const st = standings(), me = st.find(r => r.id === C.club);
-  C.hist.push({ season: C.season, w: me.w, l: me.l, place: st.indexOf(me) + 1, outcome: C.outcome, champ: C.po ? C.po.champ : null });
+  C.hist.push({ season: C.season, w: me.w, l: me.l, place: st.indexOf(me) + 1, outcome: C.outcome, champ: C.po ? C.po.champ : null, awards: seasonAwards() });
 }
 function advanceCalendar(gameRef, res) {
   gameRef.res = res;
@@ -649,13 +724,17 @@ function advanceCalendar(gameRef, res) {
     if (C.po.stage === 'semi') {
       for (const g of C.po.semis) if (!g.res) simGame(g);
       const w = C.po.semis.map(winnerOf), s = C.po.seeds; w.sort((a, b) => s.indexOf(a) - s.indexOf(b));
-      C.po.final = { home: w[0], away: w[1], res: null };
-      if (!clubWon) { simGame(C.po.final); C.po.stage = 'done'; C.po.champ = winnerOf(C.po.final); C.phase = 'over'; C.outcome = 'semi'; archiveSeason(); }
+      C.po.final = newFinal(w[0], w[1]);
+      if (!clubWon) { simFinal(C.po.final); C.po.stage = 'done'; C.po.champ = winnerOf(C.po.final); C.phase = 'over'; C.outcome = 'semi'; archiveSeason(); }
       else { C.po.stage = 'final'; genFA(); }
     } else if (C.po.stage === 'final') {
-      C.po.stage = 'done'; C.po.champ = winnerOf(gameRef); C.phase = 'over';
-      C.outcome = clubWon ? 'champion' : 'runnerup'; if (clubWon) C.titles++;
-      archiveSeason();
+      const f = C.po.final; recordFinalGame(f, gameRef);
+      if (f.res) {
+        const champWon = winnerOf(f) === C.club;
+        C.po.stage = 'done'; C.po.champ = winnerOf(f); C.phase = 'over';
+        C.outcome = champWon ? 'champion' : 'runnerup'; if (champWon) C.titles++;
+        archiveSeason();
+      }
     }
   }
 }
@@ -669,12 +748,17 @@ function startNextSeason() {
 
 /* ---------- game state ---------- */
 function newGameState(home, away, human, innings, label) {
-  const side = id => { const t = C.teams[id]; const sp = t.rotation[t.nextSP % t.rotation.length]; return { lineup: t.lineup.map(s => ({ ...s })), bench: [...t.bench], sp, pen: [...t.pen] }; };
+  const side = id => {
+    const t = C.teams[id], sp = t.rotation[t.nextSP % t.rotation.length];
+    const lineup = t.lineup.map(s => ({ ...s })), bench = t.bench.filter(b => !(getP(b).inj > 0)), subs = [];
+    for (const sl of lineup) if (getP(sl.id).inj > 0 && bench.length) { const b = bench.shift(); subs.push({ out: sl.id, in: b }); sl.id = b; }
+    return { lineup, bench, sp, pen: [...t.pen], subs };
+  };
   const A = side(away), H = side(home);
   return { home, away, human, label, innings, inning: 1, half: 0, outs: 0, bases: [null, null, null],
     line: { away: [0], home: [] }, H: { away: 0, home: 0 }, bi: { away: 0, home: 0 },
     gl: { away: A.lineup, home: H.lineup }, bench: { away: A.bench, home: H.bench }, pit: { away: A.sp, home: H.sp },
-    bf: { away: 0, home: 0 }, pen: { away: A.pen, home: H.pen }, usedP: { away: [A.sp], home: [H.sp] },
+    bf: { away: 0, home: 0 }, pen: { away: A.pen, home: H.pen }, usedP: { away: [A.sp], home: [H.sp] }, injSubs: { away: A.subs, home: H.subs },
     mom: { away: 2, home: 2 }, box: {}, log: [], over: false, walkoff: false, seq: 0, tactic: 'swing' };
 }
 const batSide = g => g.half === 0 ? 'away' : 'home';
@@ -881,7 +965,9 @@ function buntEV(g) {
   const sac = runs + reOf(o >= 3 ? [null, null, null] : nb, o);
   return pH * (hit.runs + reOf(hit.bases, hit.outs)) + (1 - pH) * sac - reOf(g.bases, g.outs);
 }
+let TUT = null;
 function botWantsSteal(g) {
+  if (TUT) return false;
   const si = stealInfo(g); if (!si || g.outs >= 2) return false;
   const p = (7 - stealNeed(g)) / 6;
   const nb = g.bases.slice(); nb[si.from - 1] = null; nb[si.from] = 1;
@@ -891,6 +977,7 @@ function botWantsSteal(g) {
 }
 // offense: maximise; defense: minimise. returns die index or -1
 function botReroll(g, dice, tactic, role) {
+  if (TUT) return -1;
   const cfg = botCfg(), side = role === 'off' ? batSide(g) : fieldSide(g);
   if (g.mom[side] <= 0) return -1;
   if (cfg.skip && rand() < cfg.skip) return -1;
@@ -940,6 +1027,30 @@ function describe(g0, res, ctx) {
 }
 
 /* ---------- finishing a game ---------- */
+function injuries(g) {
+  const hurt = [];
+  for (const side of ['away', 'home']) {
+    const t = C.teams[g[side]];
+    for (const p of t.players) if (p.inj > 0) p.inj--;
+    for (const sl of g.gl[side]) { const p = getP(sl.id), b = g.box[sl.id]; if (p && b && b.pa && rand() < .035) { p.inj = rand() < .35 ? 2 : 1; hurt.push({ id: p.id, team: g[side], games: p.inj }); } }
+  }
+  return hurt;
+}
+function playerOfGame(g) {
+  const win = runsOf(g, 'home') > runsOf(g, 'away') ? 'home' : 'away';
+  let best = null, bv = -1e9;
+  for (const side of ['away', 'home']) {
+    const ids = new Set([...g.gl[side].map(s => s.id), ...g.usedP[side], ...Object.keys(g.box).filter(id => C.teams[g[side]].players.some(p => p.id === id))]);
+    for (const id of ids) {
+      const b = g.box[id]; if (!b) continue;
+      let v = b.pa ? b.h * 2 + b.d + 2 * b.t + 3 * b.hr + b.rbi + b.r + b.bb + b.sb : 0;
+      if (b.bf) v = Math.max(v, b.po * .6 + b.pk * .8 - b.ra * 1.5);
+      if (side === win) v += 2;
+      if (v > bv) { bv = v; best = { id, team: g[side], box: b }; }
+    }
+  }
+  return best;
+}
 function applyBoxToStats(g) {
   for (const id in g.box) {
     const p = getP(id); if (!p) continue; const b = g.box[id];
@@ -952,6 +1063,7 @@ function finishGame() {
   const my = runsOf(g, side), them = runsOf(g, oppSide), won = my > them;
   const ng = nextGame();
   applyBoxToStats(g);
+  const pog = playerOfGame(g), hurt = injuries(g).filter(h => h.team === C.club);
   const xp = {}, lv = [];
   for (const p of C.teams[C.club].players) {
     const b = g.box[p.id];
@@ -971,7 +1083,7 @@ function finishGame() {
   C.credits += cr; if (won) C.allW++; else C.allL++;
   C.teams[g.home].nextSP++; C.teams[g.away].nextSP++;
   const summary = { won, my, them, opp, home: g.home, away: g.away, label: g.label, line: JSON.parse(JSON.stringify(g.line)), H: { ...g.H }, innings: g.innings,
-    box: Object.fromEntries(Object.entries(g.box).filter(([id]) => C.teams[C.club].players.some(p => p.id === id))), xp, lv, cr, walkoff: g.walkoff, final: g.label === 'Swiss Final' };
+    box: Object.fromEntries(Object.entries(g.box).filter(([id]) => C.teams[C.club].players.some(p => p.id === id))), xp, lv, cr, walkoff: g.walkoff, final: /^Swiss Final/.test(g.label), pog, hurt };
   const res = g.home === C.club ? { h: my, a: them } : { h: them, a: my };
   C.game = null; G = null;
   if (ng) advanceCalendar(ng.ref, res);
@@ -984,6 +1096,7 @@ function startGame() {
   const ng = nextGame(); if (!ng) return null;
   G = newGameState(ng.home, ng.away, ng.home === C.club ? 'home' : 'away', C.innings, ng.label);
   logPlay(G, `${teamInfo(G.away).name} at ${teamInfo(G.home).name}. ${G.label}.`, 'sys');
+  for (const side of ['away', 'home']) for (const sb of G.injSubs[side] || []) logPlay(G, `${getP(sb.out).last} is injured. ${getP(sb.in).last} starts in his place.`, 'sys');
   C.game = G; return G;
 }
 function buyGear(key) { const g = GEAR[key]; if (!g || C.credits < g.cost) return false; C.credits -= g.cost; (C.inv = C.inv || []).push(key); return true; }
@@ -1024,7 +1137,7 @@ function signFA(faId, releaseId) {
   const newOpts = { club: 'ZHE', innings: 3, diff: 'pro', confirm: false };
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const SET_KEY = 'tb-settings', NAMES_KEY = 'tb-real-names', NAMES_URL = 'https://www.easyscore.com/stats/2026/10143/0/off';
-  const SET = Object.assign({ sound: true, vibrate: true, speed: 'normal', accent: 'amber', board: 'day', cards: 'classic', odds: true, names: 'fictional' }, (() => { try { return JSON.parse(localStorage.getItem(SET_KEY) || '{}'); } catch (e) { return {}; } })());
+  const SET = Object.assign({ sound: true, vibrate: true, speed: 'normal', accent: 'amber', board: 'day', cards: 'classic', odds: true, names: 'fictional', cardInfo: false }, (() => { try { return JSON.parse(localStorage.getItem(SET_KEY) || '{}'); } catch (e) { return {}; } })());
   function saveSet() { try { localStorage.setItem(SET_KEY, JSON.stringify(SET)); } catch (e) { } applyLook(); }
   function applyLook() { const r = document.documentElement; r.dataset.accent = SET.accent; r.dataset.board = SET.board; r.dataset.cards = SET.cards; }
   applyLook();
@@ -1047,7 +1160,7 @@ function signFA(faId, releaseId) {
   const icon = (bat, size, color) => `<svg class="ico" viewBox="0 0 44 44" width="${size}" height="${size}" fill="${color || 'currentColor'}" aria-hidden="true">${bat ? ICON_BAT : ICON_GLOVE}</svg>`;
 
   /* ---------- persistence ---------- */
-  function save() { if (!C) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(C)); } catch (e) { toast('Could not save. Browser storage is full or blocked.'); } }
+  function save() { if (!C || TUT) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(C)); } catch (e) { toast('Could not save. Browser storage is full or blocked.'); } }
   function load() {
     try { const s = localStorage.getItem(SAVE_KEY); if (!s) return false; const c = JSON.parse(s); if (!c || c.v !== 2 || !c.teams) return false; C = c; G = C.game; indexPlayers(); return true; }
     catch (e) { return false; }
@@ -1110,7 +1223,7 @@ function signFA(faId, releaseId) {
       <div class="menu">
         ${saved ? `<button class="btn primary" id="tContinue">Continue<small>${sub}</small></button>` : ''}
         <button class="btn ${saved ? '' : 'primary'}" id="tNew">New campaign</button>
-        <div class="row2"><button class="btn" id="tHow">How to play</button><button class="btn" id="tSet">Settings</button></div>
+        <div class="row2"><button class="btn" id="tTut">Tutorial</button><button class="btn" id="tHow">How to play</button><button class="btn" id="tSet">Settings</button></div>
         <button class="btn ghost" id="tInstall" ${installEvt ? '' : 'hidden'}>Install on this phone</button>
       </div>
       <p class="foot">Fan-made game inspired by the Swiss baseball leagues. Not affiliated with or endorsed by the SBSF or any club. ${realNamesOn() ? 'Player names come from public league stats, stored only on this device.' : 'All players are fictional.'} v${VERSION}</p>
@@ -1118,6 +1231,7 @@ function signFA(faId, releaseId) {
     if (saved) $('#tContinue').onclick = () => { SFX.init(); go('hub'); };
     $('#tNew').onclick = () => { newOpts.confirm = false; go('new'); };
     $('#tHow').onclick = howTo;
+    $('#tTut').onclick = startTutorial;
     $('#tSet').onclick = () => openSettings('title');
     $('#tInstall').onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) { } installEvt = null; $('#tInstall').hidden = true; };
   }
@@ -1176,6 +1290,7 @@ function signFA(faId, releaseId) {
   }
   function tabNext(body) {
     let html = '';
+    if (C.po) html += `<section class="card"><div class="eyebrow">Playoffs</div><div class="bracket" style="margin-top:8px">${bracketHTML()}</div></section>`;
     if (C.game) {
       const g = C.game;
       html += `<section class="card nextgame"><div class="eyebrow">Game in progress · ${g.label}</div>
@@ -1189,38 +1304,51 @@ function signFA(faId, releaseId) {
       html += `<section class="card nextgame"><div class="eyebrow">Season ${C.season} complete</div>${o === 'champion' ? trophySVG() : ''}
         <h2 style="margin:0;font-family:var(--f-display);font-weight:400;font-size:28px;text-align:center">${head}</h2>
         <p class="muted" style="margin:0;text-align:center">Regular season ${recordOf(C.club)}, ${ordinal(place)} place.${champ && o !== 'champion' ? ` The ${champ.name} won the title.` : ''}</p>
+        ${awardsHTML(C.hist[C.hist.length - 1])}
         <p style="margin:0;text-align:center;font-size:14px">Your players keep their cards and training points. Rivals get stronger over the winter, and you receive Fr. 100.</p>
         <button class="btn primary block" id="hNextSeason" style="padding:15px;font-size:17px">Start season ${C.season + 1}</button></section>`;
     } else {
       const ng = nextGame();
       const sp = side => { const t = C.teams[ng[side]]; return getP(t.rotation[t.nextSP % t.rotation.length]); };
       const me = ng.home === C.club ? 'home' : 'away';
-      html += `<section class="card nextgame"><div class="eyebrow">${ng.label}${ng.label === 'Swiss Final' || ng.label === 'Semifinal' ? ' · single game' : ''}</div>
+      html += `<section class="card nextgame"><div class="eyebrow">${ng.label}${ng.label === 'Semifinal' ? ' · sudden death' : /^Swiss Final/.test(ng.label) ? ` · best of 3 · series ${seriesTxt()}` : ''}</div>
         <div class="vsrow"><div class="side">${badge(ng.away, 50)}<b>${teamInfo(ng.away).name}</b><small class="num">${recordOf(ng.away)}${ng.away === C.club ? ' · you' : ''}</small></div><div class="at">@</div><div class="side">${badge(ng.home, 50)}<b>${teamInfo(ng.home).name}</b><small class="num">${recordOf(ng.home)}${ng.home === C.club ? ' · you' : ''}</small></div></div>
         <div class="starters"><div><small>Your starter</small><b>${short(sp(me))}</b><span class="muted num" style="font-size:12px">${keyRatings(sp(me))}</span></div><div><small>Their starter</small><b>${short(sp(other(me)))}</b><span class="muted num" style="font-size:12px">${keyRatings(sp(other(me)))}</span></div></div>
         <button class="btn primary block" id="hPlay" style="padding:15px;font-size:17px">Play ball · ${C.innings} innings</button></section>`;
     }
     if (C.last) { const L = C.last; html += `<section class="card"><div class="eyebrow">Last game · ${L.label}</div><div class="lastres" style="margin-top:8px">${badge(L.opp, 26)}<span>${L.won ? '<span class="w">W</span>' : '<span class="l">L</span>'} <span class="num">${L.my}–${L.them}</span> ${L.home === C.club ? 'vs' : 'at'} ${teamInfo(L.opp).name}${L.walkoff ? ' · walk-off' : ''}</span></div></section>`; }
-    if (C.po) html += `<section class="card"><div class="eyebrow">Playoffs</div><div class="bracket" style="margin-top:8px">${bracketHTML()}</div></section>`;
     const tp = C.teams[C.club].players.filter(p => p.tp > 0).length;
     if (tp && !C.game) html += `<section class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>${tp} player${tp > 1 ? 's have' : ' has'} training points</b><br><span class="muted" style="font-size:13px">Upgrade their cards in the Roster tab.</span></span><button class="btn small" id="hToRoster">Open roster</button></section>`;
     body.innerHTML = html;
-    const p = $('#hPlay'); if (p) p.onclick = () => { SFX.init(); SFX.play('organ'); if (!C.game) { startGame(); save(); } G = C.game; go('game'); };
+    const p = $('#hPlay'); if (p) p.onclick = () => { SFX.init(); SFX.play('organ'); const fresh = !C.game; if (fresh) { startGame(); save(); } G = C.game; go('game'); if (fresh) matchupIntro(); };
     const n = $('#hNextSeason'); if (n) n.onclick = () => { startNextSeason(); save(); toast(`Season ${C.season} begins. Fr. 100 added.`); renderHub(); };
     const r = $('#hToRoster'); if (r) r.onclick = () => { hubTab = 'roster'; renderHub(); };
   }
+  function seriesTxt() { const f = C.po && C.po.final; if (!f) return ''; const w = seriesWins(f), me = f.home === C.club || f.away === C.club ? C.club : f.home; const op = me === f.home ? f.away : f.home; return `${w[me]}–${w[op]}`; }
   function bracketHTML() {
-    const po = C.po; const m = (g, lbl) => {
+    const po = C.po;
+    const fin = f => {
+      if (!f) return `<div class="bm"><span class="eyebrow" style="grid-column:1/-1">Swiss Final · best of 3</span><span class="muted" style="grid-column:1/-1">Waiting for the semifinal winners</span></div>`;
+      const w = seriesWins(f), champ = f.res ? winnerOf(f) : null;
+      const games = (f.games || []).map((g, i) => `<span class="gpill ${winnerOf(g) === C.club ? 'w' : (g.home === C.club || g.away === C.club) ? 'l' : ''}">G${i + 1} ${winnerOf(g)} ${Math.max(g.res.h, g.res.a)}–${Math.min(g.res.h, g.res.a)}</span>`).join('');
+      return `<div class="bm final"><span class="eyebrow" style="grid-column:1/-1">Swiss Final · best of 3</span>${[f.home, f.away].map(id => `<span class="t ${champ === id ? 'win' : ''}">${badge(id, 18)}${teamInfo(id).name}${id === C.club ? ' (you)' : ''}${champ === id ? ' 🏆' : ''}</span><span class="s">${w[id]}</span>`).join('')}${games ? `<span class="gpills" style="grid-column:1/-1">${games}</span>` : ''}</div>`;
+    };
+    const m = (g, lbl) => {
       if (!g) return `<div class="bm"><span class="muted">${lbl}: waiting for semifinal winners</span></div>`;
       const w = g.res ? winnerOf(g) : null;
       return `<div class="bm"><span class="eyebrow" style="grid-column:1/-1">${lbl}</span>${[g.away, g.home].map(id => `<span class="t ${w === id ? 'win' : ''}">${badge(id, 18)}${teamInfo(id).name}${id === C.club ? ' (you)' : ''}</span><span class="s">${g.res ? (id === g.home ? g.res.h : g.res.a) : ''}</span>`).join('')}</div>`;
     };
-    return m(po.semis[0], 'Semifinal 1 v 4') + m(po.semis[1], 'Semifinal 2 v 3') + m(po.final, 'Swiss Final');
+    return m(po.semis[0], 'Semifinal 1 v 4 · sudden death') + m(po.semis[1], 'Semifinal 2 v 3 · sudden death') + fin(po.final);
+  }
+  function awardsHTML(h) {
+    if (!h || !h.awards) return '';
+    const a = h.awards, row = (lbl, x) => x ? `<div class="award">${badge(x.team, 26)}<span><small>${lbl}</small><b>${x.name}</b><i>${teamInfo(x.team).name} · ${x.line}</i></span></div>` : '';
+    return `<div class="awards">${row('Season MVP', a.mvp)}${row('Best pitcher', a.pitcher)}</div>`;
   }
   function trophySVG() { return `<svg class="trophy" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="gold" x1="0" x2="1"><stop offset="0" stop-color="#b8860b"/><stop offset=".5" stop-color="#ffe08a"/><stop offset="1" stop-color="#b8860b"/></linearGradient></defs><path d="M34 14h52v18c0 20-12 34-26 34S34 52 34 32z" fill="url(#gold)"/><path d="M34 22H18c0 16 8 24 18 24M86 22h16c0 16-8 24-18 24" fill="none" stroke="#e0b44a" stroke-width="5"/><rect x="52" y="64" width="16" height="18" fill="#c99a2e"/><rect x="38" y="82" width="44" height="12" rx="3" fill="url(#gold)"/><rect x="30" y="94" width="60" height="12" rx="3" fill="#7a5a1a"/><circle cx="60" cy="34" r="10" fill="#f7f4ea"/><path d="M54 27q4 7 0 14M66 27q-4 7 0 14" stroke="#d1453b" stroke-width="1.4" fill="none"/></svg>`; }
   function tabTable(body) {
     const st = standings();
-    let html = `<section class="card"><div class="eyebrow">Standings · top four make the playoffs</div><table class="std" style="margin-top:6px"><thead><tr><th>Club</th><th>W</th><th>L</th><th>RD</th><th>GB</th></tr></thead><tbody>`;
+    let html = `${C.po ? `<section class="card"><div class="eyebrow">Playoffs</div><div class="bracket" style="margin-top:8px">${bracketHTML()}</div></section>` : ''}<section class="card"><div class="eyebrow">${C.po ? 'Final regular-season standings' : 'Standings'} · top four make the playoffs</div><table class="std" style="margin-top:6px"><thead><tr><th>Club</th><th>W</th><th>L</th><th>RD</th><th>GB</th></tr></thead><tbody>`;
     st.forEach((r, i) => { const gb = ((st[0].w - r.w) + (r.l - st[0].l)) / 2; html += `<tr class="${r.id === C.club ? 'me' : ''} ${i === 3 ? 'cut' : ''}"><td><span class="tname">${badge(r.id, 20)}${teamInfo(r.id).name}</span></td><td>${r.w}</td><td>${r.l}</td><td>${r.rs - r.ra > 0 ? '+' : ''}${r.rs - r.ra}</td><td>${gb ? gb.toFixed(1).replace('.0', '') : '–'}</td></tr>`; });
     html += `</tbody></table></section>`;
     const lastW = C.phase === 'season' ? C.week - 1 : C.schedule.length - 1;
@@ -1276,7 +1404,7 @@ function signFA(faId, releaseId) {
   const GRIP = '<span class="grip" data-grip aria-label="Drag to move"><svg viewBox="0 0 12 18" width="12" height="18"><g fill="currentColor"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></g></svg></span>';
   function tabRoster(body) {
     const t = C.teams[C.club], locked = !!C.game;
-    const row = (p, ord, posTxt, extra, drag) => `<div class="prow" role="button" tabindex="0" data-id="${p.id}" ${drag && !locked ? 'data-drop' : ''}>${drag && !locked ? GRIP : `<span class="ord">${ord ?? ''}</span>`}<span class="pos">${posTxt || posLabel(p.pos)}</span><span class="pn"><b>${drag && !locked && ord ? `<span class="muted">${ord}.</span> ` : ''}${short(p)}${extra || ''}</b><small>Lv ${levelOf(p)} · ${keyRatings(p)}</small></span>${p.tp ? `<span class="tp">${p.tp}</span>` : '<span></span>'}${ovrTag(p)}</div>`;
+    const row = (p, ord, posTxt, extra, drag) => `<div class="prow" role="button" tabindex="0" data-id="${p.id}" ${drag && !locked ? 'data-drop' : ''}>${drag && !locked ? GRIP : `<span class="ord">${ord ?? ''}</span>`}<span class="pos">${posTxt || posLabel(p.pos)}</span><span class="pn"><b>${drag && !locked && ord ? `<span class="muted">${ord}.</span> ` : ''}${short(p)}${extra || ''}${p.inj > 0 ? `<span class="injtag">INJ ${p.inj}</span>` : ''}</b><small>Lv ${levelOf(p)} · ${keyRatings(p)}</small></span>${p.tp ? `<span class="tp">${p.tp}</span>` : '<span></span>'}${ovrTag(p)}</div>`;
     const nextSP = t.rotation[t.nextSP % t.rotation.length];
     body.innerHTML = `
       ${locked ? `<p class="card" style="margin:0;font-size:14px">A game is in progress. Lineup changes apply from the next game; use pinch hitters and the bullpen during play.</p>` : ''}
@@ -1356,7 +1484,7 @@ function signFA(faId, releaseId) {
     const plan = movePlan(p).filter(m => !(p.moves || []).includes(m)), nextL = MOVE_LEVELS.find(L => L > lvl);
     const gearHTML = SLOTS[p.kind].map(sl => { const g = p.gear && GEAR[p.gear[sl]]; return `<button class="gslot ${g ? 'on' : ''}" data-slot="${sl}"><small>${SLOT_NAME[sl]}</small><b>${g ? g.name : 'Empty'}</b>${g ? `<i>${Object.entries(g.b).map(([k, v]) => `+${v} ${RLAB[k]}`).join(' ')}</i>` : ''}</button>`; }).join('');
     const movesHTML = (p.moves || []).map(m => `<div class="move"><b>${MOVES[m].name}</b><span>${MOVES[m].desc}</span></div>`).join('') + (plan.length && nextL && (p.moves || []).length < 4 ? `<div class="move next"><b>Lv ${nextL}: ${MOVES[plan[0]].name}</b><span>${MOVES[plan[0]].desc}</span></div>` : '');
-    openSheet(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">#${p.num} · ${posLabel(p.pos)} · ${handTag(p)}</div><h3>${p.first} ${p.last}</h3></div><div style="display:grid;justify-items:end;gap:4px"><span class="lvtag">Lv ${lvl}</span>${ovrTag(p)}</div></div>
+    openSheet(`<div class="shhead"><div style="min-width:0"><div class="eyebrow">#${p.num} · ${posLabel(p.pos)} · ${handTag(p)}${p.inj > 0 ? ` · <span class="injtag">INJURED ${p.inj} GAME${p.inj > 1 ? 'S' : ''}</span>` : ''}</div><h3>${p.first} ${p.last}</h3><div style="display:flex;gap:6px;align-items:center;margin-top:5px"><span class="lvtag">Lv ${lvl}</span>${ovrTag(p)}</div></div><button class="iconbtn back" data-a="close" aria-label="Back">${ICON_BACK}</button></div>
       <div class="xpbar"><i style="width:${xpIn / XP_PER_TP * 100}%"></i></div>
       <div class="pcard"><div class="hd"><div class="who"><b>${p.kind === 'P' ? 'Pitcher card' : 'Batter card'}</b><small>${p.kind === 'P' ? `Outs ${pct(1 - sm.ob)} · strikeouts ${pct(sm.k)}${p.pos === 'SP' ? ` · tires after about ${Math.round(pitchCap(p))} batters` : ` · tires after about ${Math.round(pitchCap(p))} batters`}` : `On base ${pct(sm.ob)} · home run ${pct(sm.hr)} · strikeout ${pct(sm.k)}`}</small></div></div>${stripHTML(card)}</div>
       <div class="rbars">${keys.map(k => `<div class="rbar"><span class="k">${RLAB[k]}</span><span class="bar"><i style="width:${Math.min(100, p.r[k] * 10)}%"></i>${er[k] > p.r[k] ? `<i class="boost" style="width:${Math.min(100 - p.r[k] * 10, (er[k] - p.r[k]) * 10)}%"></i>` : ''}</span><span class="v">${p.r[k]}${er[k] > p.r[k] ? `<em>+${er[k] - p.r[k]}</em>` : ''}</span>${p.tp > 0 && p.r[k] < 10 ? `<button class="plus" data-train="${k}" aria-label="Train ${RLAB[k]}">+1</button>` : '<span></span>'}</div>`).join('')}</div>
@@ -1459,7 +1587,7 @@ function signFA(faId, releaseId) {
   function tabClub(body) {
     body.innerHTML = `<section class="card"><div class="eyebrow">Club history</div><div class="seasons" style="margin-top:6px">
         <div><span>All-time record</span><b class="num">${C.allW}–${C.allL}</b></div><div><span>Swiss titles</span><b class="num">${C.titles}</b></div>
-        ${C.hist.map(h => `<div><span>Season ${h.season}: ${h.w}–${h.l}, ${ordinal(h.place)}</span><b>${{ champion: 'Champions', runnerup: 'Final', semi: 'Semifinal', missed: 'No playoffs' }[h.outcome] || ''}</b></div>`).join('')}
+        ${C.hist.map(h => `<div><span>Season ${h.season}: ${h.w}–${h.l}, ${ordinal(h.place)}</span><b>${{ champion: 'Champions', runnerup: 'Final', semi: 'Semifinal', missed: 'No playoffs' }[h.outcome] || ''}</b></div>${h.awards && h.awards.mvp ? `<div style="border:0;padding-top:0;font-size:12.5px" class="muted"><span>MVP ${h.awards.mvp.name} (${teamInfo(h.awards.mvp.team).name})</span></div>` : ''}`).join('')}
       </div></section>
       <button class="btn block" id="cSet">Settings, look and backup</button><button class="btn block" id="cHow">How to play</button>`;
     $('#cSet').onclick = () => openSettings('hub');
@@ -1485,7 +1613,8 @@ function signFA(faId, releaseId) {
         <div class="setrow"><span>Sound</span>${seg('sSnd', SET.sound, [[true, 'On'], [false, 'Off']])}</div>
         <div class="setrow"><span>Vibration</span>${seg('sVib', SET.vibrate, [[true, 'On'], [false, 'Off']])}</div>
         <div class="setrow"><span>Animations</span>${seg('sSpd', SET.speed, [['normal', 'Normal'], ['fast', 'Fast']])}</div>
-        <div class="setrow"><span>Show odds</span>${seg('sOdds', SET.odds, [[true, 'On'], [false, 'Off']])}</div></section>
+        <div class="setrow"><span>Show odds</span>${seg('sOdds', SET.odds, [[true, 'On'], [false, 'Off']])}</div>
+        <div class="setrow"><span>Level and rating on game cards</span>${seg('sMeta', SET.cardInfo, [[true, 'On'], [false, 'Off']])}</div></section>
       <section class="card setlist"><div class="eyebrow">Player names</div>
         <p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">${names ? `Real names saved on this phone: ${names.count} players from ${Object.keys(names.teams).length} clubs (${new Date(names.at).toLocaleDateString()}).` : 'Using fictional names.'}</p>
         <div class="setrow"><span>Names in game</span>${seg('sNames', realNamesOn() ? 'real' : 'fictional', [['fictional', 'Fictional'], ['real', 'Real']])}</div>
@@ -1499,7 +1628,7 @@ function signFA(faId, releaseId) {
     bindSeg('sInn', v => { C.innings = +v; save(); }); bindSeg('sDiff', v => { C.diff = v; save(); });
     bindSeg('sAcc', v => { SET.accent = v; saveSet(); }); bindSeg('sBoard', v => { SET.board = v; saveSet(); }); bindSeg('sCards', v => { SET.cards = v; saveSet(); });
     bindSeg('sSnd', v => { SET.sound = v === 'true'; saveSet(); }); bindSeg('sVib', v => { SET.vibrate = v === 'true'; saveSet(); });
-    bindSeg('sSpd', v => { SET.speed = v; saveSet(); }); bindSeg('sOdds', v => { SET.odds = v === 'true'; saveSet(); });
+    bindSeg('sSpd', v => { SET.speed = v; saveSet(); }); bindSeg('sOdds', v => { SET.odds = v === 'true'; saveSet(); }); bindSeg('sMeta', v => { SET.cardInfo = v === 'true'; saveSet(); });
     bindSeg('sNames', v => { if (v === 'real' && !loadNames()) { namesSheet(); return; } SET.names = v; saveSet(); applyNames(); });
     $('#sLoad').onclick = namesSheet;
     if (C) {
@@ -1744,7 +1873,8 @@ function signFA(faId, releaseId) {
     $('#bug').innerHTML = `${tm('away')}<span class="inn">${G.over ? 'FINAL' : `<i class="${G.half === 0 ? 'up' : 'down'}"></i>${G.inning}`}</span>${tm('home')}`;
     $('#outs').innerHTML = `OUTS<div>${[0, 1].map(i => `<i class="${i < G.outs ? 'o' : ''}"></i>`).join('')}</div>`;
   }
-  const gems = side => `<div class="gems" aria-label="${G.mom[side]} momentum">${Array.from({ length: MOM_MAX }, (_, i) => `<i class="gem ${i < G.mom[side] ? 'on' : ''}"></i>`).join('')}</div>`;
+  const glow = {};
+  const gems = side => `<div class="gems" aria-label="${G.mom[side]} momentum">${Array.from({ length: MOM_MAX }, (_, i) => `<i class="gem ${i < G.mom[side] ? 'on' : ''} ${i === G.mom[side] - 1 && glow[side] > Date.now() ? 'glow' : ''}"></i>`).join('')}</div>`;
   function curTactic() { return humanBatting() ? (G.tactic || 'swing') : (G.botTac || 'swing'); }
   const humanBatting = () => batSide(G) === G.human;
   function renderCards() {
@@ -1756,10 +1886,15 @@ function signFA(faId, releaseId) {
     const batCls = lr ? (lr.src === 'bat' ? 'live' : 'dim') : '', pitCls = lr ? (lr.src === 'pit' ? 'live' : 'dim') : '';
     const chip = tac !== 'swing' ? `<span class="tchip">${tac === 'power' ? 'POWER' : 'BUNT'}</span>` : '';
     $('#cards').innerHTML = `
-      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${chip}${gems(bs)}</div>
+      <div class="pcard ${batCls}" data-card="bat"><div class="hd"><span class="jn" style="background:${bt.c1};color:${bt.c2}">${icon(true, 18)}</span><b class="nm">${short(bat)}</b>${SET.cardInfo ? meta(bat) : ''}${chip}${gems(bs)}</div>
         ${stripHTML(cards.bat, { pick: lr && lr.src === 'bat' ? lr.idx : null, base: tac === 'power' ? cards.batBase : null, mark: 'pw' })}</div>
-      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${f > 0 ? '<span class="tchip warn">TIRED</span>' : ''}${gems(fs)}</div>
+      <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
         ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
+  }
+  function meta(p) { const o = ovr(p); return `<span class="pmeta"><span>Lv${levelOf(p)}</span><span class="pm"><i style="width:${Math.min(100, o * 10)}%"></i></span><b>${o.toFixed(1)}</b></span>`; }
+  function armMeter(p, side, f) {
+    const cap = pitchCap(p), left = clamp(1 - G.bf[side] / (cap + 6), 0, 1), col = f > 0 ? '#e5533d' : G.bf[side] >= cap - 2 ? '#f5b83d' : '#5fd08d';
+    return `<span class="arm ${f > 0 ? 'tired' : ''}" title="Stamina"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M3 13c2-1 3-3 3-6 0-2 1-4 3-4s3 2 3 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="pm"><i style="width:${left * 100}%;background:${col}"></i></span></span>`;
   }
   function cardInfo(which) {
     const bs = batSide(G), fs = fieldSide(G);
@@ -1831,7 +1966,7 @@ function signFA(faId, releaseId) {
         </div>
         <div class="actrow"><button class="btn primary bigbtn" id="gRoll" ${dis}>${tac === 'bunt' ? 'Bunt' : 'Roll'}</button>
           ${si ? `<button class="btn side" id="gSteal" ${dis}>Steal<small>${stealNeed(G)}+</small></button>` : ''}<button class="btn side" id="gPH" ${bench.length && !busy ? '' : 'disabled'}>Sub<small>${bench.length} left</small></button></div>`;
-      P.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { if (busy) return; G.tactic = b.dataset.t; SFX.play('tap'); renderCards(); renderPanel(); save(); });
+      P.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { if (busy) return; G.tactic = b.dataset.t; SFX.play('tap'); renderCards(); renderPanel(); save(); tutEvent('tac-' + b.dataset.t); });
       $('#gRoll').onclick = humanBats;
       const st = $('#gSteal'); if (st) st.onclick = humanSteal;
       $('#gPH').onclick = pinchSheet;
@@ -1895,7 +2030,7 @@ function signFA(faId, releaseId) {
     return r;
   }
   function waitReroll(role, dice, tactic) {
-    return new Promise(res => { phase = { kind: 'reroll', role, dice: dice.slice(), tactic, resolve: res }; renderTray(); renderPanel(); });
+    return new Promise(res => { phase = { kind: 'reroll', role, dice: dice.slice(), tactic, resolve: res }; renderTray(); renderPanel(); tutEvent('choice'); });
   }
 
   /* ---------- turn flow ---------- */
@@ -1912,13 +2047,13 @@ function signFA(faId, releaseId) {
         await finishPlay(res, ctx);
         return;
       }
-      let dice = [d6(), d6(), d6()];
+      let dice = tutDice() || [d6(), d6(), d6()];
       await animRoll(dice, [0, 1, 2]);
       let r = showRoll(dice, tac);
       // offense re-roll by the human
       if (G.mom[bs] > 0 && !onBase(r.code)) {
         const i = await waitReroll('off', dice, tac);
-        if (i >= 0) { G.mom[bs]--; SFX.play('gem'); dice[i] = d6(); await animRoll(dice, [i], { start: dice }); r = showRoll(dice, tac); setExplain(`You spent ◆ to re-roll. ` + rollText(dice, tac)); }
+        if (i >= 0) { G.mom[bs]--; SFX.play('gem'); dice[i] = d6(); if (TUT) dice[i] = forceFace(dice, i, tac, true); await animRoll(dice, [i], { start: dice }); r = showRoll(dice, tac); setExplain(`You spent ◆ to re-roll. ` + rollText(dice, tac)); }
       }
       // defense re-roll by the bot
       if (onBase(r.code)) {
@@ -1958,7 +2093,7 @@ function signFA(faId, releaseId) {
         setExplain(`Bunt die <b>${die}</b> (needs ${res.need}+) → <b class="${res.code === 'BH' ? 'hit' : 'out'}">${res.code === 'BH' ? 'Bunt hit' : res.code === 'SAC' ? 'Sacrifice: runners move up' : 'Thrown out'}</b>`);
         await finishPlay(res, ctx); return;
       }
-      let dice = [d6(), d6(), d6()];
+      let dice = tutDice() || [d6(), d6(), d6()];
       await animRoll(dice, [0, 1, 2]);
       let r = showRoll(dice, tac);
       const o = botReroll(G, dice, tac, 'off');
@@ -1969,7 +2104,7 @@ function signFA(faId, releaseId) {
       }
       if (onBase(r.code) && G.mom[fs] > 0) {
         const i = await waitReroll('def', dice, tac);
-        if (i >= 0) { G.mom[fs]--; SFX.play('gem'); dice[i] = d6(); await animRoll(dice, [i], { start: dice }); r = showRoll(dice, tac); setExplain(`You spent ◆ to re-roll their die. ` + rollText(dice, tac)); }
+        if (i >= 0) { G.mom[fs]--; SFX.play('gem'); dice[i] = d6(); if (TUT) dice[i] = forceFace(dice, i, tac, false); await animRoll(dice, [i], { start: dice }); r = showRoll(dice, tac); setExplain(`You spent ◆ to re-roll their die. ` + rollText(dice, tac)); }
       }
       await sleep(250);
       const res = applyAtBat(G, r.code);
@@ -2008,21 +2143,38 @@ function signFA(faId, releaseId) {
     if (res.runs && res.code !== 'HR') { setTimeout(() => SFX.play('cheer'), 300); buzz(25); }
     await animRunners(res.mv);
     logPlay(G, d.t, d.cls);
-    for (const m of (res.mom || [])) { banner(`${m.side === G.human ? 'You gain' : teamInfo(G[m.side]).name + ' gain'} ◆ (${m.why})`, 'mom', 1200); SFX.play('gem'); await sleep(500); }
+    for (const m of (res.mom || [])) await gemFly(m);
     const end = afterPlay(G);
     if (end) { await endOfHalf(end); return; }
-    prepTurn(); save(); busy = false; updateGame();
+    prepTurn(); save(); busy = false; updateGame(); tutEvent('played');
+  }
+  async function gemFly(m) {
+    banner(`${m.side === G.human ? 'You gain' : teamInfo(G[m.side]).name + ' gain'} ◆ (${m.why})`, 'mom', 1400);
+    glow[m.side] = Date.now() + 3500;
+    renderCards();
+    const card = m.side === batSide(G) ? 'bat' : 'pit', tgt = document.querySelector(`[data-card="${card}"] .gem:nth-child(${G.mom[m.side]})`);
+    const board = $('#board');
+    if (tgt && board && !REDUCED) {
+      const a = board.getBoundingClientRect(), b = tgt.getBoundingClientRect();
+      const fx = document.createElement('div'); fx.className = 'flygem'; document.body.appendChild(fx);
+      tgt.style.visibility = 'hidden';
+      const x0 = a.left + a.width / 2, y0 = a.top + a.height * .45, x1 = b.left + b.width / 2, y1 = b.top + b.height / 2;
+      await tween(700, k => { const e = ease(k), x = x0 + (x1 - x0) * e, y = y0 + (y1 - y0) * e - Math.sin(Math.PI * k) * 60, sc = 2.4 - 1.4 * e; fx.style.transform = `translate(${x - 8}px,${y - 8}px) rotate(45deg) scale(${sc})`; });
+      fx.remove(); tgt.style.visibility = '';
+    }
+    SFX.play('gem'); buzz(15);
+    await sleep(350);
   }
   async function endOfHalf(end) {
-    if (end === 'over') { save(); busy = false; updateGame(); await sleep(700); showGameOver(); return; }
+    if (end === 'over') { save(); busy = false; updateGame(); if (TUT) { tutEvent('played'); return; } await sleep(700); showGameOver(); return; }
     await sleep(500); banner(G.half === 0 ? `${ordinal(G.inning)} inning` : 'Side retired', '', 1000); await sleep(900);
-    lastRoll = null; prepTurn(); save(); busy = false; updateGame();
+    lastRoll = null; prepTurn(); save(); busy = false; updateGame(); tutEvent('played');
     setExplain(humanBatting() ? 'You bat. Pick a swing and roll.' : 'You pitch. Tap Pitch.');
   }
   function prepTurn() {
     if (!G || G.over) return;
     if (humanBatting()) { if (botPitchingChange(G, fieldSide(G))) banner('Pitching change', '', 900); G.tactic = 'swing'; }
-    else G.botTac = botTactic(G);
+    else G.botTac = TUT ? 'swing' : botTactic(G);
   }
   function pinchSheet() {
     const bs = batSide(G), bench = G.bench[bs], cur = curBatter(G);
@@ -2075,12 +2227,12 @@ function signFA(faId, releaseId) {
         const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
         if (a === 'close') closeSheet(); else if (a === 'box') boxSheet(); else if (a === 'log') logSheet(); else if (a === 'how') howTo();
         else if (a === 'set') { if (busy) return; save(); closeSheet(); openSettings('game'); }
-        else if (a === 'exit') { if (busy) return; save(); closeSheet(); hubTab = 'next'; go('hub'); }
+        else if (a === 'exit') { if (busy) return; if (TUT) { closeSheet(); exitTutorial(); return; } save(); closeSheet(); hubTab = 'next'; go('hub'); }
       };
     });
   }
   function showGameOver() {
-    if (!G) return;
+    if (!G || TUT) return;
     const me = runsOf(G, G.human), them = runsOf(G, other(G.human)), won = me > them;
     if (won) { SFX.play('organ'); setTimeout(() => SFX.play('cheer'), 500); }
     sheetLocked = true;
@@ -2089,6 +2241,83 @@ function signFA(faId, releaseId) {
       <button class="btn primary block" data-a="go">Continue</button>`, s => {
       s.querySelector('[data-a="go"]').onclick = () => { closeSheet(); finishGame(); save(); go('post'); };
     });
+  }
+
+  /* =================== PRE-GAME MATCHUP =================== */
+  function teamPowerAvg(side) { const ids = [...G.gl[side].map(s => s.id), G.pit[side]]; return avg(ids.map(id => ovr(getP(id)))); }
+  function matchupIntro() {
+    if (!G || G.over) return;
+    const col = side => {
+      const t = teamInfo(G[side]), pw = teamPowerAvg(side), sp = getP(G.pit[side]);
+      return `<div class="mu-side ${side}" style="--c1:${t.c1};--c2:${t.c2}">
+        <div class="mu-badge">${badge(G[side], 64)}</div><b class="mu-name">${t.name}</b><small>${t.city} · ${recordOf(G[side])}</small>
+        <div class="mu-pow"><span class="seg">${Array.from({ length: 10 }, (_, i) => `<i class="${i < Math.round(pw) ? 'on' : ''}" style="animation-delay:${.6 + i * .05}s"></i>`).join('')}</span><b>${pw.toFixed(1)}</b></div>
+        <ol class="mu-list">${G.gl[side].map((sl, i) => `<li style="animation-delay:${.9 + i * .06}s"><span>${sl.pos}</span>${short(getP(sl.id))}</li>`).join('')}<li class="sp" style="animation-delay:${1.5}s"><span>SP</span>${short(sp)}</li></ol></div>`;
+    };
+    const el = document.createElement('div'); el.id = 'matchup';
+    el.innerHTML = `<div class="mu-top">${G.label}${G.home ? ` · at ${teamInfo(G.home).city}` : ''}</div><div class="mu-grid">${col('away')}<div class="mu-vs">VS</div>${col('home')}</div><div class="mu-tap">Tap to play ball</div>`;
+    document.body.appendChild(el);
+    SFX.play('crack');
+    const done = () => { if (!el.isConnected) return; el.classList.add('out'); setTimeout(() => el.remove(), 400); };
+    el.onclick = done; setTimeout(done, 6000);
+  }
+
+  /* =================== TUTORIAL =================== */
+  let tutStep = 0;
+  const TSTEPS = [
+    { t: () => 'Welcome! Every at-bat is <b>one roll of three dice</b>. These two cards decide what happens: your <b>batter</b> (bat) and their <b>pitcher</b> (glove).', hl: 'cards', wait: 'next' },
+    { t: () => 'Tap <b>Roll</b> to bat.', hl: 'roll', wait: 'played', dice: () => findRoll('bat', ['1B', '2B', 'BB'], 'swing') },
+    { t: () => `The coloured die showed the <b>bat</b>, so the <b>batter's card</b> was read. The two white dice added up to a box on it: ${G.log[0] ? G.log[0].txt : ''} Wider boxes come up more often.`, wait: 'next' },
+    { t: () => 'Roll again. Watch the coloured die this time.', hl: 'roll', wait: 'choice', dice: () => findRoll('pit', ['GB', 'FB', 'K'], 'swing') },
+    { t: () => `A <b>glove</b>: the pitcher's card, and it's an out. But you have <b>momentum</b>, the blue gems. Spend one to re-roll a single die. The % under each die is your chance to reach base after re-rolling it. <b>Tap the best die.</b>`, hl: 'tray', wait: 'played', good: true },
+    { t: () => 'Re-rolls can rescue an at-bat, and the other team can use theirs against you. You earn gems with doubles, triples, home runs and strikeouts.', wait: 'next' },
+    { t: () => 'Try a <b>Power</b> swing: singles on the card turn into fly outs, but doubles turn into home runs. Tap <b>Power</b>, then <b>Roll</b>.', hl: 'power', wait: 'played', dice: () => findRoll('bat', ['HR'], 'power') },
+    { t: () => 'Home run! Did you see the gem fly to your card? That was your reward for an extra-base hit. Now you take the field.', wait: 'next', run: () => { G.outs = 3; afterPlay(G); lastRoll = null; prepTurn(); updateGame(); } },
+    { t: () => 'You are <b>pitching</b>. Tap <b>Pitch</b>.', hl: 'pitch', wait: 'choice', dice: () => findRoll('bat', ['1B', '2B', 'BB'], 'swing') },
+    { t: () => 'They reached base. Spend a gem to re-roll <b>one of their dice</b>. Now the % shows the chance of an <b>out</b>. Tap a die.', hl: 'tray', wait: 'played', bad: true },
+    { t: () => 'That\'s the heart of the game. Your other tools: <b>Steal</b> and <b>Sub</b> when batting, <b>Pen</b> (bullpen) and <b>Walk</b> when pitching. Tap a player card any time for details.', wait: 'next' },
+    { t: () => 'You\'re ready. Win games, earn prize money, buy gear in the Market, level up your players and chase the Swiss title!', final: true }
+  ];
+  function findRoll(src, codes, tactic) {
+    if (!G) return null;
+    const card = cardsNow(G, tactic)[src];
+    for (const s of [7, 6, 8, 5, 9, 4, 10, 3, 11, 2, 12]) if (codes.includes(card[s - 2])) { const a = Math.min(6, s - 1); return [src === 'bat' ? 2 : 5, a, s - a]; }
+    return null;
+  }
+  function forceFace(dice, i, tac, good) { for (let v = 1; v <= 6; v++) { const d = dice.slice(); d[i] = v; if (onBase(readDice(G, d, tac).code) === good) return v; } return dice[i]; }
+  function tutDice() { if (!TUT || !TUT.dice) return null; const d = TUT.dice; TUT.dice = null; return d; }
+  function startTutorial() {
+    TUT = { dice: null };
+    newCampaign({ club: 'ZHE', innings: 1, diff: 'rookie' });
+    G = newGameState('ZHB', 'ZHE', 'away', 1, 'Tutorial'); C.game = G; G.mom.home = 0;
+    document.body.classList.add('tut');
+    tutStep = 0; go('game'); runTutStep();
+  }
+  function exitTutorial(then) {
+    TUT = null; tutStep = 0; document.body.classList.remove('tut'); delete document.body.dataset.tut;
+    const c = $('#coach'); if (c) c.remove();
+    C = null; G = null; load();
+    if (then === 'new') { newOpts.confirm = false; go('new'); } else go('title');
+  }
+  function runTutStep() {
+    const st = TSTEPS[tutStep]; if (!st) { exitTutorial(); return; }
+    if (st.run) st.run();
+    TUT.dice = st.dice ? st.dice() : null;
+    document.body.dataset.tut = st.hl || '';
+    let c = $('#coach'); if (!c) { c = document.createElement('div'); c.id = 'coach'; document.body.appendChild(c); } c.classList.remove('wait');
+    c.innerHTML = `<div class="coach-step">Tutorial · ${tutStep + 1} of ${TSTEPS.length}</div><p>${st.t()}</p><div class="coach-btns">${st.final ? '<button class="btn" data-c="title">Title screen</button><button class="btn primary" data-c="new">Start a campaign</button>' : `<button class="btn ghost small" data-c="skip">Skip tutorial</button>${st.wait === 'next' ? '<button class="btn primary small" data-c="next">Next</button>' : ''}`}</div>`;
+    c.onclick = e => {
+      const b = e.target.closest('[data-c]'); if (!b) return;
+      const a = b.dataset.c;
+      if (a === 'next') { tutStep++; runTutStep(); }
+      else if (a === 'skip' || a === 'title') exitTutorial();
+      else if (a === 'new') exitTutorial('new');
+    };
+  }
+  function tutEvent(name) {
+    if (!TUT) return;
+    const st = TSTEPS[tutStep]; if (!st) return;
+    if (st.wait === name) { tutStep++; document.body.dataset.tut = ''; const c = $('#coach'); if (c) c.classList.add('wait'); setTimeout(runTutStep, name === 'played' ? 400 : 50); }
   }
 
   /* =================== POST GAME =================== */
@@ -2101,13 +2330,19 @@ function signFA(faId, releaseId) {
       if (b) { if (p.kind === 'P') line = `${(b.po / 3 | 0)}.${b.po % 3} IP, ${b.ra} R, ${b.pk} K`; else { line = `${b.h}-for-${b.ab}`; if (b.hr) line += `, ${b.hr} HR`; if (b.rbi) line += `, ${b.rbi} RBI`; if (b.bb) line += `, ${b.bb} BB`; if (b.sb) line += `, ${b.sb} SB`; } }
       return `<div class="star"><span class="pos">${p.kind === 'P' ? p.pos : (team.lineup.find(s => s.id === id) || {}).pos || posLabel(p.pos)}</span><span><b>${p.first} ${p.last}</b><small>${line || 'did not play'}</small></span><span class="xp">+${x} XP</span></div>`;
     }).join('');
-    const champ = L.final && L.won;
+    const champ = L.final && L.outcome === 'champion';
+    const pogP = L.pog && getP(L.pog.id);
+    const pogLine = pogP ? (pogP.kind === 'P' ? `${(L.pog.box.po / 3 | 0)}.${L.pog.box.po % 3} IP, ${L.pog.box.ra} R, ${L.pog.box.pk} K` : `${L.pog.box.h}-for-${L.pog.box.ab}${L.pog.box.hr ? `, ${L.pog.box.hr} HR` : ''}${L.pog.box.rbi ? `, ${L.pog.box.rbi} RBI` : ''}${L.pog.box.bb ? `, ${L.pog.box.bb} BB` : ''}`) : '';
+    const sf = L.final && C.po && C.po.final && !C.po.final.res ? C.po.final : null;
     app.innerHTML = `<section class="post wrap">
       <div class="res"><span class="eyebrow">${L.label}</span>${champ ? trophySVG() : ''}<h2 class="${L.won ? 'w' : 'l'}">${champ ? 'Swiss champions!' : L.won ? (L.walkoff ? 'Walk-off win' : 'Victory') : 'Defeat'}</h2>
         <div class="score">${badge(L.away, 34)}<span>${L.away === C.club ? L.my : L.them}–${L.home === C.club ? L.my : L.them}</span>${badge(L.home, 34)}</div></div>
       ${lineScore(L.line, L.H, L.away, L.home, L.innings)}
+      ${pogP ? `<section class="card pog">${badge(L.pog.team, 40)}<span><small>Player of the game</small><b>${pogP.first} ${pogP.last}</b><i>${teamInfo(L.pog.team).name} · ${pogLine}</i></span></section>` : ''}
+      ${sf ? `<p class="card" style="margin:0">Swiss Final series: <b>${seriesTxt()}</b>. ${seriesWins(sf)[C.club] === 1 && seriesWins(sf)[sf.home === C.club ? sf.away : sf.home] === 1 ? 'It all comes down to Game 3!' : 'Next up: Game ' + (sf.games.length + 1) + '.'}</p>` : ''}
       <section class="card" style="display:grid;gap:10px"><div class="eyebrow">Top performers</div><div class="stars3">${top}</div></section>
-      ${L.lv.length ? `<section class="card" style="display:grid;gap:10px"><div class="eyebrow">Level ups</div><div class="lvl">${L.lv.map(l => `<span>${short(getP(l.id))} Lv ${l.level || ''}</span>`).join('')}</div>${L.lv.filter(l => l.learned && l.learned.length).map(l => `<div class="move learned"><b>${short(getP(l.id))} learned ${l.learned.map(m => MOVES[m].name).join(' and ')}!</b><span>${l.learned.map(m => MOVES[m].desc).join('; ')}</span></div>`).join('')}</section>` : ''}
+      ${L.lv.length ? `<section class="card" style="display:grid;gap:10px" id="lvSect"><div class="eyebrow">Level ups · spend training points</div>${L.lv.map(l => lvBox(l)).join('')}</section>` : ''}
+      ${L.hurt && L.hurt.length ? `<section class="card" style="display:grid;gap:6px"><div class="eyebrow">Injury report</div>${L.hurt.map(h => `<div style="font-size:14px"><span class="injtag">INJ</span> <b>${short(getP(h.id))}</b> misses the next ${h.games > 1 ? h.games + ' games' : 'game'}. A bench player starts in his place.</div>`).join('')}</section>` : ''}
       <section class="card" style="display:flex;justify-content:space-between;align-items:center"><span>Prize money</span><b style="color:var(--amber);font-size:20px">Fr. ${L.cr}</b></section>
       ${L.phase === 'over' && !champ ? `<p class="card" style="margin:0">${{ semi: 'Your season ends in the semifinal.', runnerup: 'So close. You fall in the Swiss Final.', missed: 'The season is over.' }[L.outcome] || ''}</p>` : ''}
       ${C.po && C.po.stage === 'final' && L.label === 'Semifinal' ? `<p class="card" style="margin:0">You're through to the Swiss Final against the ${teamInfo(C.po.final.home === C.club ? C.po.final.away : C.po.final.home).name}.</p>` : ''}
@@ -2115,7 +2350,18 @@ function signFA(faId, releaseId) {
       <button class="btn primary block" id="pCont" style="padding:15px;font-size:17px">Back to the clubhouse</button>
     </section>`;
     $('#pCont').onclick = () => { hubTab = 'next'; go('hub'); };
+    const ls = $('#lvSect'); if (ls) ls.onclick = e => {
+      const b = e.target.closest('[data-train]'); if (!b) return;
+      const box = b.closest('[data-pid]'), p = getP(box.dataset.pid), k = b.dataset.train;
+      if (p.tp > 0 && p.r[k] < 10) { p.r[k]++; p.tp--; save(); SFX.play('gem'); box.outerHTML = lvBox(L.lv.find(l => l.id === p.id)); }
+    };
     if (champ) confetti();
+  }
+  function lvBox(l) {
+    const p = getP(l.id), keys = p.kind === 'P' ? ['stu', 'ctl', 'sta'] : ['con', 'pow', 'spd', 'eye'], er = R(p);
+    return `<div class="lvbox" data-pid="${p.id}"><div class="lvh"><b>${p.first} ${p.last}</b><span class="lvtag">Lv ${levelOf(p)}</span><span class="muted" style="font-size:12.5px;margin-left:auto">${p.tp ? `${p.tp} point${p.tp > 1 ? 's' : ''} to spend` : 'All points spent'}</span></div>
+      ${(l.learned || []).map(m => `<div class="move learned"><b>Learned ${MOVES[m].name}!</b><span>${MOVES[m].desc}</span></div>`).join('')}
+      <div class="rbars">${keys.map(k => `<div class="rbar"><span class="k">${RLAB[k]}</span><span class="bar"><i style="width:${Math.min(100, p.r[k] * 10)}%"></i>${er[k] > p.r[k] ? `<i class="boost" style="width:${Math.min(100 - p.r[k] * 10, (er[k] - p.r[k]) * 10)}%"></i>` : ''}</span><span class="v">${p.r[k]}</span>${p.tp > 0 && p.r[k] < 10 ? `<button class="plus" data-train="${k}" aria-label="Train ${RLAB[k]}">+1</button>` : '<span></span>'}</div>`).join('')}</div></div>`;
   }
   function confetti() {
     if (REDUCED) return;
@@ -2131,7 +2377,7 @@ function signFA(faId, releaseId) {
   /* =================== ROUTER =================== */
   function go(s) {
     screen = s; closeSheet(); window.scrollTo(0, 0);
-    if (s === 'game' && G && !G.over) { if (!humanBatting() && !G.botTac) G.botTac = botTactic(G); }
+    if (s === 'game' && G && !G.over) { if (!humanBatting() && !G.botTac) G.botTac = TUT ? 'swing' : botTactic(G); }
     if (s === 'title') renderTitle(); else if (s === 'settings') renderSettings(); else if (s === 'new') renderNew(); else if (s === 'hub') renderHub(); else if (s === 'game') { renderGameScreen(); if (G && !G.over) setExplain(humanBatting() ? 'You bat. Pick a swing and roll.' : 'You pitch. Tap Pitch.'); } else if (s === 'post') renderPost();
   }
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = $('#tInstall'); if (b) b.hidden = false; });
