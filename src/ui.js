@@ -1264,20 +1264,7 @@
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = $('#tInstall'); if (b) b.hidden = false; });
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
 
-  (function manifest() {
-    try {
-      const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
-      x.fillStyle = '#0c1611'; x.fillRect(0, 0, 512, 512);
-      x.fillStyle = '#c27a4b'; x.beginPath(); x.moveTo(256, 440); x.lineTo(440, 256); x.lineTo(256, 72); x.lineTo(72, 256); x.closePath(); x.fill();
-      x.fillStyle = '#367a43'; x.beginPath(); x.moveTo(256, 400); x.lineTo(400, 256); x.lineTo(256, 112); x.lineTo(112, 256); x.closePath(); x.fill();
-      const die = (cx, cy, s, v, bg, fg) => { x.fillStyle = bg; x.beginPath(); x.roundRect(cx - s / 2, cy - s / 2, s, s, s * .2); x.fill(); x.fillStyle = fg; const P = [[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]; for (const i of PIPS[v]) { x.beginPath(); x.arc(cx + P[i][0] * s * .27, cy + P[i][1] * s * .27, s * .09, 0, 7); x.fill(); } };
-      die(200, 270, 150, 5, '#2457c5', '#ffffff'); die(320, 250, 150, 6, '#f6f1e3', '#1b1b1b');
-      const icon = c.toDataURL('image/png'), start = location.href.split('#')[0];
-      const m = { name: 'Tactical Baseball', short_name: 'Tactical BB', description: 'Dice-and-cards baseball with a Swiss league campaign', start_url: start, scope: start.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'portrait', background_color: '#0c1611', theme_color: '#0c1611', icons: [{ src: icon, sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: icon, sizes: '192x192', type: 'image/png', purpose: 'any' }] };
-      const l = document.createElement('link'); l.rel = 'manifest'; l.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(m)); document.head.appendChild(l);
-      for (const rel of ['apple-touch-icon', 'icon']) { const a = document.createElement('link'); a.rel = rel; a.href = icon; document.head.appendChild(a); }
-    } catch (e) { }
-  })();
+  if ('serviceWorker' in navigator && window.isSecureContext) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
 
   load();
   (function intro() {

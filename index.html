@@ -9,6 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="Tactical Baseball: a dice-and-cards baseball board game with a Swiss league campaign.">
 <title>Tactical Baseball</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Graduate&display=swap">
@@ -480,7 +483,7 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
    ===================================================================== */
 const VERSION = '2.1';
 const CHANGELOG = [
-  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings', 'Rating in a coloured box on the game cards', 'Power restyles the batter card; Bunt shows only Safe vs Out on the batter card']],
+  ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings', 'Rating in a coloured box on the game cards', 'Proper installable app: real manifest, icons and offline support', 'Power restyles the batter card; Bunt shows only Safe vs Out on the batter card']],
   ['2.0', 'Oct 29, 2026', ['Dice and board game with the Swiss club campaign', 'Gear, levels and learnable moves', 'Drag-and-drop batting order and optimizer', 'Season stats, home parks, real names import, settings page']]
 ];
 const SAVE_KEY = 'tactical-baseball-v2';
@@ -2427,20 +2430,7 @@ function signFA(faId, releaseId) {
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = $('#tInstall'); if (b) b.hidden = false; });
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
 
-  (function manifest() {
-    try {
-      const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
-      x.fillStyle = '#0c1611'; x.fillRect(0, 0, 512, 512);
-      x.fillStyle = '#c27a4b'; x.beginPath(); x.moveTo(256, 440); x.lineTo(440, 256); x.lineTo(256, 72); x.lineTo(72, 256); x.closePath(); x.fill();
-      x.fillStyle = '#367a43'; x.beginPath(); x.moveTo(256, 400); x.lineTo(400, 256); x.lineTo(256, 112); x.lineTo(112, 256); x.closePath(); x.fill();
-      const die = (cx, cy, s, v, bg, fg) => { x.fillStyle = bg; x.beginPath(); x.roundRect(cx - s / 2, cy - s / 2, s, s, s * .2); x.fill(); x.fillStyle = fg; const P = [[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]; for (const i of PIPS[v]) { x.beginPath(); x.arc(cx + P[i][0] * s * .27, cy + P[i][1] * s * .27, s * .09, 0, 7); x.fill(); } };
-      die(200, 270, 150, 5, '#2457c5', '#ffffff'); die(320, 250, 150, 6, '#f6f1e3', '#1b1b1b');
-      const icon = c.toDataURL('image/png'), start = location.href.split('#')[0];
-      const m = { name: 'Tactical Baseball', short_name: 'Tactical BB', description: 'Dice-and-cards baseball with a Swiss league campaign', start_url: start, scope: start.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'portrait', background_color: '#0c1611', theme_color: '#0c1611', icons: [{ src: icon, sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: icon, sizes: '192x192', type: 'image/png', purpose: 'any' }] };
-      const l = document.createElement('link'); l.rel = 'manifest'; l.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(m)); document.head.appendChild(l);
-      for (const rel of ['apple-touch-icon', 'icon']) { const a = document.createElement('link'); a.rel = rel; a.href = icon; document.head.appendChild(a); }
-    } catch (e) { }
-  })();
+  if ('serviceWorker' in navigator && window.isSecureContext) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
 
   load();
   (function intro() {
