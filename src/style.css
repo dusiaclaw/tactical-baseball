@@ -433,3 +433,8 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
 .pst b{margin-right:4px}
 .pst em{margin-left:3px}
 .pcard .nm{flex:1 1 0; min-width:0}
+
+.pst{display:flex; align-items:center; gap:3px}
+.pst .chip{font-style:normal; font-weight:800; font-size:11px; padding:1px 4px; border-radius:5px; line-height:1.25}
+.pst .chip em{font-size:8px; margin:0 2px 0 0; opacity:.75}
+.pst b{margin-right:2px}

@@ -767,7 +767,10 @@
       <div class="pcard ${pitCls}" data-card="pit"><div class="hd"><span class="jn" style="background:${ft.c1};color:${ft.c2}">${icon(false, 18)}</span><b class="nm">${short(pit)}</b>${pst(pit, cards.pit)}${SET.cardInfo ? meta(pit) : ''}${armMeter(pit, fs, f)}${gems(fs)}</div>
         ${stripHTML(cards.pit, { pick: lr && lr.src === 'pit' ? lr.idx : null, base: f > 0 ? cards.pitFresh : null })}</div>`;
   }
-  function pst(p, card) { const sm = cardSummary(card); return `<span class="pst"><b>${ovr(p).toFixed(1)}</b><em>OB</em>${Math.round(sm.ob * 100)} <em>HR</em>${Math.round(sm.hr * 100)} <em>K</em>${Math.round(sm.k * 100)}</span>`; }
+  function pst(p, card) {
+    const sm = cardSummary(card), n = x => Math.round(x * 100), ch = (k, l, v) => `<i class="chip ${k}"><em>${l}</em>${n(v)}</i>`;
+    return `<span class="pst"><b>${ovr(p).toFixed(1)}</b>${p.kind === 'P' ? ch('k-out', 'Out', 1 - sm.ob) + ch('k-k', 'K', sm.k) : ch('k-hit', 'OB', sm.ob) + ch('k-hr', 'HR', sm.hr) + ch('k-k', 'K', sm.k)}</span>`;
+  }
   function meta(p) { const o = ovr(p); return `<span class="pmeta"><span>Lv${levelOf(p)}</span><span class="pm"><i style="width:${Math.min(100, o * 10)}%"></i></span><b>${o.toFixed(1)}</b></span>`; }
   function armMeter(p, side, f) {
     const cap = pitchCap(p), left = clamp(1 - G.bf[side] / (cap + 6), 0, 1), col = f > 0 ? '#e5533d' : G.bf[side] >= cap - 2 ? '#f5b83d' : '#5fd08d';
