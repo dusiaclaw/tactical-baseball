@@ -3,8 +3,9 @@
    TACTICAL BASEBALL — dice engine (pure logic, no DOM)
    Every at-bat: card die (1–3 batter card, 4–6 pitcher card) + two white dice (2–12).
    ===================================================================== */
-const VERSION = '2.2';
+const VERSION = '2.3';
 const CHANGELOG = [
+  ['2.3', 'Oct 31, 2026', ['Score card at every half-inning and inning change: both scores, who is up, runs just scored, final-inning and extra-inning tags', 'Changelog has its own button (Settings, and the version link on the title screen)', 'Complete backup: campaign, rosters, stats, gear, settings and imported names in one file. You can restore from the Settings page even with no campaign yet']],
   ['2.2', 'Oct 30, 2026', ['Rating shown in a coloured box on the game cards', 'Power restyles the batter card; Bunt shows only Safe vs Out on the batter card', 'Proper installable app: real manifest, icons and offline support, new app identity to fix a stuck Android install']],
   ['2.1', 'Oct 30, 2026', ['Playoff bracket with sudden-death semifinals and a best-of-3 Swiss Final', 'Tutorial mode: a guided 12-step game from the title screen', 'Pre-game matchup intro with team badges and roster ratings', 'Player of the game, season MVP and best pitcher awards', 'Injuries with automatic bench substitutes', 'Training points can be spent right on the post-game screen', 'Momentum gem flies to the card and glows', 'Pitcher stamina meter; optional level and rating on game cards', 'Back arrow on the player page', 'Changelog in Settings']],
   ['2.0', 'Oct 29, 2026', ['Dice and board game with the Swiss club campaign', 'Gear, levels and learnable moves', 'Drag-and-drop batting order and optimizer', 'Season stats, home parks, real names import, settings page']]

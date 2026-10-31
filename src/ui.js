@@ -39,6 +39,7 @@
     try { const s = localStorage.getItem(SAVE_KEY); if (!s) return false; const c = JSON.parse(s); if (!c || c.v !== 2 || !c.teams) return false; C = c; G = C.game; indexPlayers(); return true; }
     catch (e) { return false; }
   }
+  function loadSaved() { try { return JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { return null; } }
   function hasSave() { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } }
   let toastT = null;
   function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
@@ -100,12 +101,12 @@
         <div class="row2"><button class="btn" id="tTut">Tutorial</button><button class="btn" id="tHow">How to play</button><button class="btn" id="tSet">Settings</button></div>
         <button class="btn ghost" id="tInstall" ${installEvt ? '' : 'hidden'}>Install on this phone</button>
       </div>
-      <p class="foot">Fan-made game inspired by the Swiss baseball leagues. Not affiliated with or endorsed by the SBSF or any club. ${realNamesOn() ? 'Player names come from public league stats, stored only on this device.' : 'All players are fictional.'} v${VERSION}</p>
+      <p class="foot">Fan-made game inspired by the Swiss baseball leagues. Not affiliated with or endorsed by the SBSF or any club. ${realNamesOn() ? 'Player names come from public league stats, stored only on this device.' : 'All players are fictional.'} <button class="verlink" id="tVer">v${VERSION} · Changelog</button></p>
     </section>`;
     if (saved) $('#tContinue').onclick = () => { SFX.init(); go('hub'); };
     $('#tNew').onclick = () => { newOpts.confirm = false; go('new'); };
     $('#tHow').onclick = howTo;
-    $('#tTut').onclick = startTutorial;
+    $('#tTut').onclick = startTutorial; $('#tVer').onclick = changelogSheet;
     $('#tSet').onclick = () => openSettings('title');
     $('#tInstall').onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) { } installEvt = null; $('#tInstall').hidden = true; };
   }
@@ -471,6 +472,9 @@
   /* =================== SETTINGS =================== */
   function openSettings(from) { backTo = from; go('settings'); }
   function seg(id, cur, opts) { return `<div class="chips" id="${id}">${opts.map(([v, l]) => `<button class="chip ${String(cur) === String(v) ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div>`; }
+  function changelogSheet() {
+    openSheet(`<div class="eyebrow">Changelog</div><h3>Tactical Baseball v${VERSION}</h3>${CHANGELOG.map(c => `<div class="clog"><b>v${c[0]}</b> <span class="muted">${c[1]}</span><ul>${c[2].map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}<button class="btn block" data-a="close">Close</button>`, sh => sh.querySelector('[data-a="close"]').onclick = closeSheet);
+  }
   function renderSettings() {
     const names = loadNames();
     const sw = (v, col, l) => `<button class="swatch ${SET.accent === v ? 'on' : ''}" data-v="${v}" style="--sw:${col}" aria-label="${l}"></button>`;
@@ -493,11 +497,11 @@
         <p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">${names ? `Real names saved on this phone: ${names.count} players from ${Object.keys(names.teams).length} clubs (${new Date(names.at).toLocaleDateString()}).` : 'Using fictional names.'}</p>
         <div class="setrow"><span>Names in game</span>${seg('sNames', realNamesOn() ? 'real' : 'fictional', [['fictional', 'Fictional'], ['real', 'Real']])}</div>
         <button class="btn" id="sLoad">${names ? 'Update real names' : 'Load real names'}</button></section>
-      <section class="card setlist"><div class="eyebrow">Changelog</div>
-        ${CHANGELOG.map(c => `<div class="clog"><b>v${c[0]}</b> <span class="muted">${c[1]}</span><ul>${c[2].map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}</section>
-      ${C ? `<section class="card setlist"><div class="eyebrow">Backup</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cExport" style="flex:1">Export backup</button><button class="btn" id="cImport" style="flex:1">Restore backup</button><input type="file" id="cFile" accept="application/json,.json" hidden></div>
-        <button class="btn danger" id="cReset">Start a new campaign</button></section>` : ''}
+      <section class="card setlist"><div class="eyebrow">About</div><button class="btn" id="sLog">Changelog<small>What's new in v${VERSION}</small></button></section>
+      <section class="card setlist"><div class="eyebrow">Backup</div>
+        <p class="muted" style="margin:0;font-size:13.5px;line-height:1.45">One file with everything: campaign, rosters, stats, gear and purchases, club history, settings and imported names.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">${C ? '<button class="btn" id="cExport" style="flex:1">Export backup</button>' : ''}<button class="btn" id="cImport" style="flex:1">Restore backup</button><input type="file" id="cFile" accept="application/json,.json" hidden></div>
+        ${C ? '<button class="btn danger" id="cReset">Start a new campaign</button>' : ''}</section>
     </section>`;
     const bindSeg = (id, fn) => { const el = $('#' + id); if (el) el.onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; fn(b.dataset.v); SFX.play('tap'); renderSettings(); }; };
     $('#sBack').onclick = () => go(backTo === 'game' && C && C.game ? 'game' : backTo === 'hub' && C ? 'hub' : 'title');
@@ -506,21 +510,39 @@
     bindSeg('sSnd', v => { SET.sound = v === 'true'; saveSet(); }); bindSeg('sVib', v => { SET.vibrate = v === 'true'; saveSet(); });
     bindSeg('sSpd', v => { SET.speed = v; saveSet(); }); bindSeg('sOdds', v => { SET.odds = v === 'true'; saveSet(); }); bindSeg('sMeta', v => { SET.cardInfo = v === 'true'; saveSet(); });
     bindSeg('sNames', v => { if (v === 'real' && !loadNames()) { namesSheet(); return; } SET.names = v; saveSet(); applyNames(); });
-    $('#sLoad').onclick = namesSheet;
-    if (C) {
-      $('#cReset').onclick = () => { newOpts.confirm = true; go('new'); };
-      $('#cExport').onclick = () => {
-        try { const blob = new Blob([JSON.stringify(C)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `tactical-baseball-${teamInfo(C.club).name.toLowerCase()}-season${C.season}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800); toast('Backup file saved.'); }
-        catch (e) { toast('Export failed on this device.'); }
+    $('#sLoad').onclick = namesSheet; $('#sLog').onclick = changelogSheet;
+    if (C) $('#cReset').onclick = () => { newOpts.confirm = true; go('new'); };
+    if (C) $('#cExport').onclick = () => {
+      try {
+        const file = { app: 'tactical-baseball', backup: 3, version: VERSION, at: new Date().toISOString(), campaign: C, settings: SET, names: loadNames() };
+        const blob = new Blob([JSON.stringify(file)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `tactical-baseball-${teamInfo(C.club).name.toLowerCase()}-season${C.season}-week${C.week}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+        toast(`Backup saved: campaign, settings${file.names ? ', names' : ''}.`);
+      } catch (e) { toast('Export failed on this device.'); }
+    };
+    $('#cImport').onclick = () => $('#cFile').click();
+    $('#cFile').onchange = e => {
+      const f = e.target.files[0]; if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        try {
+          const raw = JSON.parse(rd.result), full = raw && raw.backup && raw.campaign, c = full ? raw.campaign : raw;
+          if (!c || c.v !== 2 || !c.teams || !c.club) throw 0;
+          C = c; G = C.game; indexPlayers();
+          if (full) {
+            if (raw.settings && typeof raw.settings === 'object') Object.assign(SET, raw.settings);
+            if (raw.names && raw.names.teams) { try { localStorage.setItem(NAMES_KEY, JSON.stringify(raw.names)); } catch (er) { } }
+            saveSet();
+          }
+          applyNames(); save();
+          const players = Object.keys(C.teams).reduce((n, k) => n + ((C.teams[k].players || C.teams[k].roster || []).length || 0), 0);
+          const ok = !!(loadSaved() && loadSaved().club === C.club);
+          toast(ok ? `Backup restored${full ? ' with settings and names' : ' (campaign only: old file)'}.` : 'Restored, but saving to this browser failed.');
+          renderSettings();
+        } catch (err) { toast('That file is not a Tactical Baseball backup.'); }
       };
-      $('#cImport').onclick = () => $('#cFile').click();
-      $('#cFile').onchange = e => {
-        const f = e.target.files[0]; if (!f) return;
-        const rd = new FileReader();
-        rd.onload = () => { try { const c = JSON.parse(rd.result); if (!c || c.v !== 2 || !c.teams || !c.club) throw 0; C = c; G = C.game; indexPlayers(); applyNames(); save(); toast('Backup restored.'); renderSettings(); } catch (err) { toast('That file is not a Tactical Baseball backup.'); } };
-        rd.readAsText(f);
-      };
-    }
+      rd.readAsText(f);
+    };
   }
 
   /* =================== REAL PLAYER NAMES =================== */
@@ -1046,9 +1068,27 @@
     SFX.play('gem'); buzz(15);
     await sleep(350);
   }
+  function halfCard() {
+    return new Promise(res => {
+      const ph = G.half === 1 ? 0 : 1, pin = G.half === 1 ? G.inning : G.inning - 1, ps = ph === 0 ? 'away' : 'home';
+      const runs = (G.line[ps][pin - 1]) || 0, last = G.inning >= G.innings, hs = runsOf(G, 'home'), as = runsOf(G, 'away');
+      const tag = G.inning > G.innings ? (G.half === 0 ? 'Extra innings' : 'Extra innings') : last ? (G.half === 1 ? 'Final inning, bottom half' : 'Final inning') : '';
+      const t = side => teamInfo(G[side]), me = side => side === G.human ? 'you' : '';
+      const sc = side => `<div class="hc-team ${G.human === side ? 'me' : ''}">${badge(G[side], 46)}<b>${t(side).name}</b><span class="hc-n">${side === 'away' ? as : hs}</span></div>`;
+      const msg = runs ? `${t(ps).name} scored <b>${runs}</b> ${runs === 1 ? 'run' : 'runs'} in the ${ph === 0 ? 'top' : 'bottom'} of the ${ordinal(pin)}` : `${t(ps).name} went scoreless in the ${ph === 0 ? 'top' : 'bottom'} of the ${ordinal(pin)}`;
+      const el = document.createElement('div'); el.id = 'halfcard';
+      el.innerHTML = `<div class="hc-box"><div class="hc-title"><span class="hc-arrow">${G.half === 0 ? '▲' : '▼'}</span>${G.half === 0 ? 'Top' : 'Bottom'} of the ${ordinal(G.inning)}</div>${tag ? `<div class="hc-tag">${tag}</div>` : ''}
+        <div class="hc-score">${sc('away')}<span class="hc-dash">–</span>${sc('home')}</div><div class="hc-msg">${msg}</div></div>`;
+      document.body.appendChild(el); SFX.play('pop');
+      let fin = false; const done = () => { if (fin) return; fin = true; el.classList.add('out'); setTimeout(() => { el.remove(); res(); }, 260); };
+      el.onclick = done; setTimeout(done, 1900 * SPEED());
+    });
+  }
   async function endOfHalf(end) {
     if (end === 'over') { save(); busy = false; updateGame(); if (TUT) { tutEvent('played'); return; } await sleep(700); showGameOver(); return; }
-    await sleep(500); banner(G.half === 0 ? `${ordinal(G.inning)} inning` : 'Side retired', '', 1000); await sleep(900);
+    await sleep(400);
+    if (TUT) { banner(G.half === 0 ? `${ordinal(G.inning)} inning` : 'Side retired', '', 1000); await sleep(900); }
+    else await halfCard();
     lastRoll = null; prepTurn(); save(); busy = false; updateGame(); tutEvent('played');
     setExplain(humanBatting() ? 'You bat. Pick a swing and roll.' : 'You pitch. Tap Pitch.');
   }
