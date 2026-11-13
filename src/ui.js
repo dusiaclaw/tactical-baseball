@@ -68,8 +68,7 @@
 
   /* ---------- shared graphics ---------- */
   function badge(id, size) {
-    const t = teamInfo(id), one = t.badge.length === 1;
-    return `<svg class="bdg" viewBox="0 0 40 44" width="${size}" height="${Math.round(size * 1.1)}" aria-hidden="true"><path d="M20 2L37 8V22C37 33 29 39 20 42C11 39 3 33 3 22V8Z" fill="${t.c1}" stroke="${t.c2}" stroke-width="2.6"/><text x="20" y="${one ? 31 : 27.5}" text-anchor="middle" font-family="Graduate, Georgia, serif" font-size="${one ? 22 : 14}" fill="${t.c2}">${t.badge}</text></svg>`;
+    return `<svg class="bdg" viewBox="0 0 40 44" width="${size}" height="${Math.round(size * 1.1)}" aria-hidden="true">${crestInner(id)}</svg>`;
   }
   const starsFor = str => { const n = clamp(Math.round((str - 4.4) * 2.4), 1, 5); return `<span class="stars" aria-label="${n} of 5">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`; };
   const ovrTag = p => { const o = ovr(p); return `<span class="ovr ${o >= 7 ? 'hi' : ''}">${o.toFixed(1)}</span>`; };
@@ -485,7 +484,7 @@
         <div class="setrow"><span>Difficulty</span>${seg('sDiff', C.diff, [['rookie', 'Rookie'], ['pro', 'Pro'], ['legend', 'Legend']])}</div></section>` : ''}
       <section class="card setlist"><div class="eyebrow">Look</div>
         <div class="setrow"><span>Accent colour</span><div class="chips" id="sAcc">${sw('amber', '#f5b83d', 'Amber')}${sw('red', '#ff5a5f', 'Swiss red')}${sw('ice', '#6cc4ff', 'Ice blue')}${sw('lime', '#b5e853', 'Lime')}</div></div>
-        <div class="setrow"><span>Field</span>${seg('sBoard', SET.board, [['day', 'Home parks'], ['night', 'Night'], ['paper', 'Paper']])}</div>
+        <div class="setrow"><span>Field</span>${seg('sBoard', SET.board, [['day', 'Stadiums'], ['night', 'Always night'], ['paper', 'Paper']])}</div>
         <div class="setrow"><span>Card colours</span>${seg('sCards', SET.cards, [['classic', 'Classic'], ['contrast', 'High contrast']])}</div></section>
       <section class="card setlist"><div class="eyebrow">Sound and feel</div>
         <div class="setrow"><span>Sound</span>${seg('sSnd', SET.sound, [[true, 'On'], [false, 'Off']])}</div>
@@ -724,33 +723,23 @@
     SIF: { g1: '#367a3c', g2: '#2e6b34', pat: 'stripes', dirt: '#c4844f', infield: '#418a47' },
     HUU: { g1: '#2f6b40', g2: '#285d37', pat: 'rows', dirt: '#c07757', infield: '#397c4a' }
   };
-  function parkVars(id) { if (SET.board !== 'day') return ''; const p = PARKS[id]; return p ? `--g1:${p.g1};--g2:${p.g2};--dirt:${p.dirt};--infield:${p.infield}` : ''; }
-  function badgeAt(id, x, y, w) { const t = teamInfo(id), one = t.badge.length === 1; return `<svg x="${x}" y="${y}" width="${w}" height="${w * 1.1}" viewBox="0 0 40 44"><path d="M20 2L37 8V22C37 33 29 39 20 42C11 39 3 33 3 22V8Z" fill="${t.c1}" stroke="${t.c2}" stroke-width="2.6"/><text x="20" y="${one ? 31 : 27.5}" text-anchor="middle" font-family="Graduate, Georgia, serif" font-size="${one ? 22 : 14}" fill="${t.c2}">${t.badge}</text></svg>`; }
+  function parkVars(id) { if (SET.board === 'paper') return ''; const p = PARKS[id]; return p ? `--g1:${p.g1};--g2:${p.g2};--dirt:${p.dirt};--infield:${p.infield};--lines:#f7f4ea` : ''; }
+  const gameWx = () => { const w = (G && G.wx) || { time: 'day', w: 'clear' }; return SET.board === 'night' ? { time: 'night', w: w.w } : w; };
   function boardStatic() {
-    const pk = (PARKS[G && G.home] || PARKS.ZHE).pat;
-    const pat = pk === 'checks' ? `<pattern id="mw" width="28" height="28" patternUnits="userSpaceOnUse"><rect width="28" height="28" style="fill:var(--g1)"/><rect width="14" height="14" style="fill:var(--g2)"/><rect x="14" y="14" width="14" height="14" style="fill:var(--g2)"/></pattern>`
-      : pk === 'rows' ? `<pattern id="mw" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" style="fill:var(--g1)"/><rect width="24" height="12" style="fill:var(--g2)"/></pattern>`
-      : `<pattern id="mw" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(${pk === 'diag' ? 45 : 0})"><rect width="20" height="20" style="fill:var(--g1)"/><rect width="10" height="20" style="fill:var(--g2)"/></pattern>`;
-    return `<defs>${pat}</defs>
-      <rect x="0" y="0" width="300" height="180" fill="url(#mw)"/>
-      <path d="M150 176 L248 94 L150 12 L52 94 Z" style="fill:var(--dirt)"/>
-      <path d="M150 148 L218 94 L150 40 L82 94 Z" style="fill:var(--infield)"/>
-      ${G ? `<g opacity=".5">${badgeAt(G.home, 138, 106, 24)}</g>` : ''}
-      <circle cx="150" cy="94" r="9" fill="#cc8656"/><rect x="146" y="93" width="8" height="2" fill="#f7f4ea"/>
-      <path d="M150 156 L10 16 M150 156 L290 16" style="stroke:var(--lines)" stroke-width="1.5" opacity=".6"/>
-      ${[1, 2, 3].map(i => `<rect x="${BP[i][0] - 7}" y="${BP[i][1] - 7}" width="14" height="14" fill="#f7f4ea" transform="rotate(45 ${BP[i][0]} ${BP[i][1]})"/>`).join('')}
-      <path d="M144 152h12v6l-6 6l-6-6z" fill="#f7f4ea"/>
-      <g id="Lrun"></g><g id="Lbat"></g>`;
+    const id = (G && G.home) || 'ZHE';
+    return (SET.board === 'paper' ? paperSVG(id) : stadiumSVG(id, gameWx(), teamInfo(id), (PARKS[id] || PARKS.ZHE).pat)) + '<g id="Lfld"></g><g id="Lrun"></g><g id="Lbat"></g><g id="Lball"></g><g id="Lfx"></g>';
   }
   function renderGameScreen() {
     if (!G) { go('hub'); return; }
     const hc = teamInfo(C.club);
     document.documentElement.style.setProperty('--club1', hc.c1); document.documentElement.style.setProperty('--club2', hc.c2);
     phase = null; lastRoll = null;
+    if (!G.wx) G.wx = TUT ? { time: 'day', w: 'clear' } : pickWx();
+    const wx = gameWx(), park = SET.board !== 'paper';
     app.innerHTML = `<div class="game">
       <div class="gbar"><button class="iconbtn" id="gMenu" aria-label="Game menu">${ICON_MENU}</button><div class="bug" id="bug"></div><div class="outs" id="outs"></div></div>
       <div class="gmain">
-        <div class="board" id="board" style="${parkVars(G.home)}"><svg id="boardSvg" viewBox="44 6 212 174" role="img" aria-label="Bases">${boardStatic()}</svg><div class="banner" id="banner"></div><div class="note" id="note"></div></div>
+        <div class="board" id="board" style="${parkVars(G.home)}"><svg id="boardSvg" viewBox="14 -38 272 216" role="img" aria-label="Field">${boardStatic()}</svg>${park && wx.w === 'rain' ? '<div class="rain"></div>' : ''}${park ? `<div class="wx"><b>${(STADIUM[G.home] || {}).name || ''}</b>${wxShort(wx)}</div>` : ''}<div class="banner" id="banner"></div><div class="note" id="note"></div></div>
         <div id="cards"></div>
         <div class="tray" id="tray"></div>
         <div id="panel" style="display:grid;gap:8px"></div>
@@ -763,12 +752,13 @@
   }
   function updateGame() {
     if (screen !== 'game' || !G) return;
-    renderBug(); renderCards(); renderTray(); renderPanel(); drawRunners(); drawBatter();
+    renderBug(); renderCards(); renderTray(); renderPanel(); drawFielders(); drawRunners(); drawBatter();
   }
   function renderBug() {
     const bs = batSide(G);
     const tm = side => `<span class="tm ${!G.over && bs === side ? 'batting' : ''}">${badge(G[side], 20)}${G[side]}</span><span class="sc">${runsOf(G, side)}</span>`;
     $('#bug').innerHTML = `${tm('away')}<span class="inn">${G.over ? 'FINAL' : `<i class="${G.half === 0 ? 'up' : 'down'}"></i>${G.inning}`}</span>${tm('home')}`;
+    const sb = $('#sbTxt'); if (sb) sb.textContent = `${runsOf(G, 'away')} - ${runsOf(G, 'home')}`;
     $('#outs').innerHTML = `OUTS<div>${[0, 1].map(i => `<i class="${i < G.outs ? 'o' : ''}"></i>`).join('')}</div>`;
   }
   const glow = {};
@@ -884,9 +874,10 @@
   }
 
   /* ---------- board ---------- */
-  function meeple(id, pt, t, label) { return `<g data-k="${id}" transform="translate(${pt[0]} ${pt[1]})"><ellipse cy="9" rx="10" ry="3.5" fill="#000" opacity=".35"/><circle r="12" fill="${t.c1}" stroke="${t.c2}" stroke-width="2.6"/><text y="4.5" text-anchor="middle" fill="${t.c2}" style="font:800 11px Archivo, sans-serif">${label}</text></g>`; }
+  const meeple = (id, pt, t, label) => sprite(id, pt, t, label);
+  function drawFielders() { const L = $('#Lfld'); if (!L) return; if (G.over) { L.innerHTML = ''; return; } const t = teamInfo(G[fieldSide(G)]); L.innerHTML = Object.keys(FIELD_POS).map(k => sprite('f' + k, fp(...FIELD_POS[k]), t, null, { s: .62, glove: 1 })).join(''); $('#Lball').innerHTML = ''; }
   function drawRunners() { const t = teamInfo(G[batSide(G)]); $('#Lrun').innerHTML = G.bases.map((id, i) => id ? meeple(id, BP[i + 1], t, getP(id).num) : '').join(''); }
-  function drawBatter() { if (G.over) { $('#Lbat').innerHTML = ''; return; } const b = curBatter(G), t = teamInfo(G[batSide(G)]); $('#Lbat').innerHTML = meeple('bat', [b.hand === 'R' ? 128 : 172, 160], t, b.num); }
+  function drawBatter() { if (G.over) { $('#Lbat').innerHTML = ''; return; } const b = curBatter(G), t = teamInfo(G[batSide(G)]); $('#Lbat').innerHTML = sprite('bat', [b.hand === 'R' ? 128 : 172, 158], t, b.num, { bat: 1, left: b.hand !== 'R' }); }
   const lerp = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
   function moveTok(key, p) { const g = $('#Lrun').querySelector(`[data-k="${key}"]`); if (g) g.setAttribute('transform', `translate(${p[0].toFixed(1)} ${p[1].toFixed(1)})`); }
   async function animRunners(mv) {
@@ -899,6 +890,44 @@
       for (let b = m.from; b < m.to; b++) await tween(260, k => moveTok(m.id, lerp(BP[b % 4], BP[(b + 1) % 4], ease(k))));
       if (m.to >= 4) { await tween(200, k => g.setAttribute('opacity', 1 - k)); g.remove(); }
     }));
+  }
+  /* ---------- ball flight ---------- */
+  function ballAt(p, h) { $('#Lball').innerHTML = `<ellipse cx="${p[0].toFixed(1)}" cy="${(p[1] + 1).toFixed(1)}" rx="3" ry="1.3" fill="#000" opacity=".3"/><circle cx="${p[0].toFixed(1)}" cy="${(p[1] - h).toFixed(1)}" r="${(2.7 + h * .035).toFixed(2)}" fill="#fff" stroke="#c0392b" stroke-width=".7"/>`; }
+  const fly = (a, b, ms, H) => tween(ms, k => ballAt(lerp(a, b, k), H * 4 * k * (1 - k)));
+  const fpos = k => fp(...FIELD_POS[k]);
+  function moveFld(k, p) { const g = $('#Lfld').querySelector(`[data-k="f${k}"]`); if (g) g.setAttribute('transform', `translate(${p[0].toFixed(1)} ${p[1].toFixed(1)})`); }
+  const chase = (k, to, ms) => { const a = fpos(k); return tween(ms, q => moveFld(k, lerp(a, to, ease(q)))); };
+  async function burst(p) {
+    const cols = ['#ffc94a', '#fff', '#ff7a59', '#9fd3ff'], n = 14, c = $('.crowd');
+    if (c) { c.classList.add('cheer'); setTimeout(() => c.classList.remove('cheer'), 2200); }
+    await tween(700, k => { $('#Lfx').innerHTML = Array.from({ length: n }, (_, i) => { const a = i / n * 6.283, d = 6 + 26 * ease(k) * (.6 + (i % 3) * .2); return `<circle cx="${(p[0] + Math.cos(a) * d).toFixed(1)}" cy="${(p[1] + Math.sin(a) * d * .7 - 8 * k).toFixed(1)}" r="${(2.2 * (1 - k) + .4).toFixed(1)}" fill="${cols[i % 4]}" opacity="${(1 - k * k).toFixed(2)}"/>`; }).join(''); });
+    $('#Lfx').innerHTML = '';
+  }
+  async function animBall(res, ctx) {
+    const c = res.code, S = STADIUM[G.home] || STADIUM.ZHE, rnd = (a, b) => a + Math.random() * (b - a), side = Math.random() < .5 ? -1 : 1, plate = [150, 152], B1 = BP[1], B2 = BP[2];
+    if (c === 'K' || c === 'BB') return;
+    if (c === 'HR') { const to = fp(rnd(-36, 36), S.R + S.st * .6 + 5); await fly(plate, to, 950, 62); $('#Lball').innerHTML = ''; await burst(to); return; }
+    if (c === '1B' || c === '2B' || c === '3B') {
+      const a = c === '3B' ? side * rnd(35, 41) : c === '2B' ? side * rnd(12, 30) : rnd(-34, 34), to = fp(a, c === '1B' ? rnd(170, 184) : S.R - rnd(7, 14)), k = a < -13 ? 'LF' : a > 13 ? 'RF' : 'CF';
+      await Promise.all([fly(plate, to, c === '1B' ? 480 : 680, c === '1B' ? 14 : 34), chase(k, to, c === '1B' ? 640 : 860)]); await sleep(160);
+    } else if (c === 'FB') {
+      const k = ['LF', 'CF', 'RF'][Math.floor(Math.random() * 3)], p = fpos(k), to = [p[0] + rnd(-10, 10), p[1] + rnd(-4, 4)];
+      await Promise.all([fly(plate, to, 850, 56), chase(k, to, 700)]); await sleep(140);
+    } else if (c === 'SAC' || c === 'BO' || c === 'BH') {
+      const to = fp(side * rnd(8, 24), rnd(30, 40));
+      await Promise.all([fly(plate, to, 420, 0), chase('P', to, 520)]);
+      if (c !== 'BH') await fly(to, B1, 300, 7);
+    } else if (c === 'GB' || c === 'DP') {
+      const k = ['SS', '2B', '3B', 'SS'][Math.floor(Math.random() * 4)], to = fpos(k);
+      await fly(plate, to, 400, 0);
+      if (res.mv.filter(m => m.to === 'out').length > 1) { await fly(to, B2, 240, 5); await fly(B2, B1, 300, 8); } else await fly(to, B1, 340, 9);
+    }
+    $('#Lball').innerHTML = '';
+  }
+  async function animPlay(res, ctx) {
+    if (!ctx.ibb) { await fly(fpos('P'), [150, 152], 190, 4); if (res.code === 'K' || res.code === 'BB') { ballAt(fpos('C'), 2); await sleep(150); } }
+    $('#Lball').innerHTML = '';
+    await Promise.all([animBall(res, ctx).catch(() => { }), animRunners(res.mv)]);
   }
   let bannerT = null;
   function banner(txt, cls, ms) { const b = $('#banner'); if (!b) return; b.textContent = txt; b.className = 'banner show ' + (cls || ''); clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('show'), ms || 1100); }
@@ -1044,7 +1073,7 @@
     else if (onBase(res.code) && res.code !== 'BB') SFX.play('crack');
     else if (res.code === 'K') SFX.play('pop'); else if (cls === 'out') SFX.play('thud');
     if (res.runs && res.code !== 'HR') { setTimeout(() => SFX.play('cheer'), 300); buzz(25); }
-    await animRunners(res.mv);
+    await animPlay(res, ctx);
     logPlay(G, d.t, d.cls);
     for (const m of (res.mom || [])) await gemFly(m);
     const end = afterPlay(G);

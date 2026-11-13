@@ -464,3 +464,14 @@ body[data-tut="roll"] #gRoll, body[data-tut="pitch"] #gPitch, body[data-tut="pow
 .hc-dash{font-size:28px; opacity:.5}
 .hc-msg{font-size:13.5px; color:#c9d3c9} .hc-msg b{color:#fff}
 @keyframes hcin{from{opacity:0}} @keyframes hcpop{from{transform:translateY(16px) scale(.92); opacity:0}} @keyframes hcnum{from{transform:scale(1.6); opacity:0}}
+/* ---------- stadiums, sky and weather ---------- */
+.board{background:#3a4148}
+.board .cl{animation:drift 46s ease-in-out infinite alternate} .board .cl.c2{animation-duration:64s; animation-direction:alternate-reverse}
+@keyframes drift{from{transform:translateX(-14px)} to{transform:translateX(22px)}}
+.board .tw{animation:twk 2.6s ease-in-out infinite alternate} @keyframes twk{from{opacity:.25} to{opacity:1}}
+.board .bob{animation:bob 4s ease-in-out infinite alternate} .board .bob.b2{animation-duration:5.5s} @keyframes bob{from{transform:translate(0,0)} to{transform:translate(3px,1.2px)}}
+.board .crowd.cheer{animation:cheer .28s steps(2) 8} @keyframes cheer{from{stroke-dashoffset:0; opacity:1} to{stroke-dashoffset:2.4; opacity:.75}}
+.rain{position:absolute; inset:-40px; pointer-events:none; opacity:.5; background:repeating-linear-gradient(105deg, transparent 0 9px, #dfe9f2 9px 10px, transparent 10px 23px); background-size:46px 120px; animation:rain .45s linear infinite}
+@keyframes rain{from{background-position:0 0} to{background-position:-32px 120px}}
+.wx{position:absolute; left:6px; bottom:6px; font-size:10.5px; font-weight:700; letter-spacing:.02em; color:#eef3ef; background:#050b08b8; border-radius:7px; padding:3px 7px; pointer-events:none; max-width:30%; line-height:1.25} .wx b{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+@media (prefers-reduced-motion: reduce){.board .cl,.board .tw,.board .bob,.rain{animation:none}}
